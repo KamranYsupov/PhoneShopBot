@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
-COPY ../pyproject.toml ../pyproject.toml
+COPY ./pyproject.toml pyproject.toml
 RUN pip install --upgrade pip && \
     pip install 'poetry>=1.4.2' && \
     poetry config virtualenvs.create false && \

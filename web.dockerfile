@@ -6,14 +6,14 @@ ENV DJANGO_SETTINGS_MODULE 'web.core.settings'
 
 WORKDIR /app
 
-COPY ../pyproject.toml ../pyproject.toml
+COPY ./pyproject.toml pyproject.toml
 RUN mkdir -p /app/web/static/ && \
     mkdir -p /app/web/media/  &&  \
     pip install --upgrade pip && \
     pip install 'poetry>=1.4.2' && \
     poetry config virtualenvs.create false && \
     poetry install --no-root --no-dev
-
+    
 COPY . .
 
 EXPOSE 8000
