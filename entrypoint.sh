@@ -2,6 +2,4 @@
 
 python manage.py collectstatic --noinput
 python manage.py migrate --noinput
-python manage.py runserver 0:8000 # Использовать только для локальной разработке. Для прода используем gunicorn
-
-# gunicorn core.wsgi:application -w 4 --bind 0.0.0.0:8000 --log-level warning
+gunicorn web.core.wsgi:application --bind 0.0.0.0:8000 --log-level warning
