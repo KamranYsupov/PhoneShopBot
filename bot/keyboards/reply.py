@@ -34,5 +34,6 @@ def get_reply_contact_keyboard(
 reply_cancel_keyboard = get_reply_keyboard(buttons=('Отмена ❌',))
 reply_keyboard_remove = ReplyKeyboardRemove()
 reply_contact_keyboard = get_reply_contact_keyboard()
+reply_start_keyboard = get_reply_keyboard(buttons=('Меню 📁', ))
 
     

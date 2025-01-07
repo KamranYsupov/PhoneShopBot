@@ -2,7 +2,7 @@
 from aiogram import Router, types
 from aiogram.filters import CommandStart, Command, CommandObject
 
-from keyboards.inline import inline_menu_keyboard
+from keyboards.reply import reply_start_keyboard
 from models import TelegramUser
 
 router = Router()
@@ -37,7 +37,7 @@ async def start_command_handler(
     )
     await message.answer(
         message_text,
-        reply_markup=inline_menu_keyboard
+        reply_markup=reply_start_keyboard
     )
     return 
     

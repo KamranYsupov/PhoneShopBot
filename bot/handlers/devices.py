@@ -6,18 +6,21 @@ from asgiref.sync import sync_to_async
 
 from keyboards.inline import (
     get_inline_keyboard,
-    inline_cancel_keyboard
+    inline_cancel_keyboard,
+    get_device_inline_keyboard
 )
 from utils.message import get_device_info_message
+from utils.validators import validate_quantity
 from models import (
     TelegramUser, 
+    CartItem,
     DeviceCompany,
     DeviceModel,
     DeviceSeries, 
     Device
 )
-from .state import QuantityState
-from orm.cart import add_to_cart
+from .state import CartItemState
+from orm.cart import add_to_cart, get_cart_quantity
 
 router = Router()
 
@@ -36,6 +39,7 @@ async def device_companies_callback_query(
         company.name: f'com_{company.id}_{page_number}_1'
         for company in device_companies
     }
+    buttons['Назад 🔙'] = 'menu'
     
     await callback.message.edit_text(
         message_text,
@@ -108,8 +112,11 @@ async def device_model_callback_query(
     
 @router.callback_query(F.data.startswith('ser_'))
 async def device_series_callback_query(
-    callback: types.CallbackQuery
+    callback: types.CallbackQuery,
+    state: FSMContext,
 ):
+    await state.clear()
+    
     page_number = int(callback.data.split('_')[-1])
     per_page = 5
     previous_page_number = int(callback.data.split('_')[-2])
@@ -146,67 +153,81 @@ async def device_callback_query(
     per_page = 5
     previous_page_number = int(callback.data.split('_')[-2])
     device_id = callback.data.split('_')[-3]
-
+    
+    telegram_user = await TelegramUser.objects.aget(
+        telegram_id=callback.from_user.id
+    )
     device = await Device.objects.aget(id=device_id)
-    message_text = get_device_info_message(device)
+    cart_quantity = await get_cart_quantity(
+        device_id=device.id,
+        telegram_user_id=telegram_user.id,
+    )
+    
+    message_text = get_device_info_message(device, cart_quantity)
     message_text += '\nУкажите количество.'
     
     await state.update_data(device_id=device_id)
-    await state.set_state(QuantityState.quantity)
+    await state.set_state(CartItemState.quantity)
     
-    buttons = {}
-    buttons['Назад 🔙'] = \
-        f'ser_{device.series_id}_{previous_page_number}_{page_number}'
-        
-    await callback.message.delete(
-        reply_markup=inline_cancel_keyboard
-    )
-    await callback.message.answer(
-        message_text,
-        reply_markup=get_inline_keyboard(
+    if cart_quantity:
+        reply_markup = get_device_inline_keyboard(device.id)
+    else:
+        buttons = {
+            'Вернутся в меню 📁': 'menu',
+            'Назад 🔙': \
+                f'ser_{device.series_id}_{previous_page_number}_{page_number}'
+        }
+        reply_markup = get_inline_keyboard(
             buttons=buttons,
-            sizes=(1, ) * per_page,
-        ),
+            sizes=(1, 1, 1)
+        )
+        
+    await callback.message.edit_text(
+        message_text,
+        reply_markup=reply_markup,
         parse_mode='HTML',
     )
     
     
-@router.message(F.text, QuantityState.quantity)
+@router.message(F.text, CartItemState.quantity)
 async def add_to_cart_message_handler(
     message: types.Message,
     state: FSMContext,
 ):
     state_data = await state.get_data()
     device = await Device.objects.aget(id=state_data['device_id'])
+    
+    quantity = await validate_quantity(
+        message, 
+        device.quantity,
+        message.text,
+    )
+    if not quantity:
+        return
+    
     telegram_user = await TelegramUser.objects.aget(
         telegram_id=message.from_user.id
     )  
     cart_item = await add_to_cart(
         device_id=device.id,
         telegram_user_id=telegram_user.id,
-        quantity=state_data['quantity']
+        quantity=quantity
     )
     if not cart_item:
         return 
     
     await state.clear()
-    await state.update_data(device_id=device_id)
-    await state.set_state(QuantityState.quantity)
+    await state.update_data(device_id=device.id)
+    await state.set_state(CartItemState.quantity)
     
-    message_text = get_device_info_message(device)
+    message_text = get_device_info_message(
+        device,
+        cart_item.quantity
+    )
     message_text += '\nУкажите количество.'
-    
-    buttons = {
-        'Убрать из корзины': f'rm_from_cart_{device.id}'
-        'Корзина': 'cart',
-        'Вернуться в меню': 'menu',
-    }
 
     await message.answer(
         message_text,
-        reply_markup=get_inline_keyboard(
-            buttons=buttons,
-            sizes=(1, 1, 1),
-        ),
+        reply_markup=get_device_inline_keyboard(device.id),
         parse_mode='HTML',
     )
