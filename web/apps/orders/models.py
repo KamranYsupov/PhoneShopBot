@@ -42,6 +42,11 @@ class Order(AsyncBaseModel):
         related_name='orders',
         verbose_name=_('Покупатель'),
     )
+    comment = models.CharField(
+        _('Комментарий'),
+        max_length=150,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = _('заказ')
@@ -56,14 +61,7 @@ class Order(AsyncBaseModel):
             
             self.number = (max_value or 0) + 1  # Увеличиваем на 1, если max_value None
             
-        super.save(**args, **kwargs)
-            
-    def clean(self):
-        super().clean()
-        if not self.items.all():
-            raise ValidationError(
-                'В заказе должен быть добавлен хотя бы 1 элемент'
-            )
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.number)
@@ -85,7 +83,45 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
     class Meta:
         verbose_name = _('элемент заказа')
         verbose_name_plural = _('элементы заказа')
-    
+        
+    def save(self, *args, **kwargs):
+        if self.device.quantity < self.quantity:
+            return 
+
+        if not self._state.adding: # Если не создаем объект
+            return super().save(*args, **kwargs) 
+        
+        same_order_item = OrderItem.objects.filter(
+            order_id=self.order_id,
+            device_id=self.device.id
+        ).first()
+        
+        if not same_order_item:
+            return super().save(*args, **kwargs)
+        
+        same_order_item.quantity += self.quantity
+        same_order_item.save()   
+        
+    def clean(self):
+        if self.device.quantity < self.quantity:
+            raise ValidationError(
+                _(f'Количество {self.device.name} '
+                  'превышает количесто товара на складе')
+            )
+            
+    @property
+    def general_price(self) -> int:
+        general_price = self.price_for_one
+        
+        return general_price * self.quantity
+       
+    @property 
+    def price_for_one(self) -> int:
+        price_for_one = self.device.price_from_1 \
+            if self.quantity < 20 else self.device.price_from_20
+        
+        return price_for_one   
+                
     
 
 

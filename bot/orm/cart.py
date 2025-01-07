@@ -41,5 +41,16 @@ def get_cart_quantity(
     )
     
     return cart_quantity
+
+
+@sync_to_async
+def clear_cart(
+    telegram_user_id: TelegramUser.id, 
+) -> None:
+    CartItem.objects.filter(
+        telegram_user_id=telegram_user_id
+    ).delete()
+    
+    
     
     

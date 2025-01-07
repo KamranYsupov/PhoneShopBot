@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 
 from keyboards.inline import get_inline_keyboard
 from models import TelegramUser, Device, CartItem
-from utils.message import get_cart_item_info_message
+from utils.message import get_cart_message_and_buttons
 
 router = Router()
 
@@ -20,42 +20,14 @@ async def cart_callback_handler(
     telegram_user = await TelegramUser.objects.aget(
         telegram_id=callback.from_user.id
     )
-    cart = await CartItem.objects.afilter(
+    cart_items = await CartItem.objects.afilter(
         telegram_user_id=telegram_user.id,
         select_relations=('device', )
     )
     
-    buttons = {}
-    
-    cart_data = {}
-    for cart_item in cart:
-        cart_data[cart_item.device.id] = cart_item
-        
-    message_text = ''
-    cart_price = 0
-    for index, device_id in enumerate(cart_data):
-        cart_item = cart_data[device_id]
-        cart_price += cart_item.general_price
-        
-        message_text += \
-            f'{index + 1}) {get_cart_item_info_message(cart_item)}\n\n'
-            
-        buttons[cart_item.device.name] = f'dev_{cart_item.device_id}_1_1'
-        
-    if not message_text:
-        message_text += 'Ваша корзина пуста.'
-    else: 
-        message_text = (
-            '<b>Корзина:</b>\n\n' + 
-            message_text +
-            f'Итого: <b>{cart_price} руб</b>'
-        )
-        buttons.update({
-            'Создать заказ 📝': 'create_order',
-            'Очистить корзину 🧹': 'ask_clear_cart',
-        })
-        
-    buttons['Вернуться в меню 📁'] = 'menu'
+    message_text, buttons = get_cart_message_and_buttons(
+        cart_items
+    )
     
     await callback.message.edit_text(
         message_text,

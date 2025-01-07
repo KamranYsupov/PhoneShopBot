@@ -1,4 +1,6 @@
-from models import Device, CartItem
+from typing import Sequence, Union
+
+from models import Device, CartItem, OrderItem
 
 
 def get_device_info_message(
@@ -24,24 +26,72 @@ def get_device_info_message(
     return device_info_message
 
 
-def get_cart_item_info_message(
-    cart_item: CartItem,
-) -> str:    
-    price_for_one_string = get_formated_digit_string(
-        cart_item.price_for_one, ' '
-    )
-    general_price_string = get_formated_digit_string(
-        cart_item.general_price, ' '
-    ) 
-        
-    cart_item_info = (
-        f'<b>{cart_item.device.name}</b>\n'
-        f'<em>◦ <b>{cart_item.quantity} шт</b> × <b>{price_for_one_string}</b>'
+def get_item_info_message(item: CartItem | OrderItem) -> str:
+    price_for_one_string = get_formated_digit_string(item.price_for_one, ' ')
+    general_price_string = get_formated_digit_string(item.general_price, ' ')
+    
+    return (
+        f'<b>{item.device.name}</b>\n'
+        f'<em>◦ <b>{item.quantity} шт</b> × <b>{price_for_one_string}</b>'
         f' = <b>{general_price_string} руб</b></em>'
     )
+
+
+def get_message_and_buttons(
+    items: Sequence[Union[CartItem, OrderItem]], 
+    is_cart: bool = True
+) -> tuple[str, dict]:
+    buttons = {}
+    message_text = ''
+    total_price = 0
     
-    return cart_item_info
+    for index, item in enumerate(items):
+        total_price += item.general_price
+        message_text += f'{index + 1}) {get_item_info_message(item)}\n\n'
+        
+        if is_cart:
+            buttons[item.device.name] = f'dev_{item.device_id}_1_1'
+            
+    total_price_label = f'Итого: <b>{total_price} руб</b>'
     
+    if is_cart:
+        if not message_text:
+            message_text = 'Ваша корзина пуста.' 
+        else:
+            message_text = (
+                f'<b>Корзина:</b>\n\n{message_text}'
+                + total_price_label
+            )
+            buttons.update({
+                'Создать заказ 📝': 'create_order',
+                'Очистить корзину 🧹': 'ask_clear_cart',
+            })
+    else:
+        message_text += total_price_label
+        buttons['Корзина 🛒'] = 'cart'
+    
+    
+    buttons['Вернуться в меню 📁'] = 'menu'
+    
+    return message_text, buttons
+
+
+def get_cart_message_and_buttons(
+    cart_items: Sequence[CartItem]
+) -> tuple[str, dict]:
+    return get_message_and_buttons(
+        cart_items, 
+        is_cart=True
+    )
+
+
+def get_order_message_and_buttons(
+    order_items: Sequence[OrderItem]
+) -> tuple[str, dict]:
+    return get_message_and_buttons(
+        order_items, 
+        is_cart=False
+    )
     
 def get_formated_digit_string(
     digit: int | float,
