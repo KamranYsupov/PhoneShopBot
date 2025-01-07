@@ -40,9 +40,11 @@ class DeviceModelAdmin(admin.ModelAdmin):
 
 @admin.register(DeviceSeries)
 class DeviceSeriesAdmin(admin.ModelAdmin):
+    list_display = ('name', 'model')
     inlines = (DeviceInline, )
 
 
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'series', 'quantity', 'price_from_1', 'price_from_20')
+    list_editable = ('quantity', 'price_from_1', 'price_from_20')
