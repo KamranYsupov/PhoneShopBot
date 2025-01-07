@@ -59,3 +59,13 @@ class TimestampMixin(models.Model):
 
     class Meta:
         abstract = True
+    
+    
+class QuantityMixin(models.Model):
+    quantity = models.PositiveBigIntegerField(
+        verbose_name=_('Количество')
+    )
+
+    class Meta:
+        abstract = True
+        
