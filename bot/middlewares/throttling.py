@@ -3,8 +3,7 @@ from typing import Dict, Coroutine
 
 from loguru import logger
 from aiogram.types import Message
-
-from core import config 
+from django.conf import settings
 
 async def rate_limit_middleware(
     handler: Coroutine,
@@ -29,7 +28,7 @@ async def rate_limit_middleware(
     user_data = rate_limit_middleware.users[user_id]
     last_message_time = user_data['last_message_time']
 
-    if current_time - last_message_time < config.MAX_MESSAGE_PER_SECOND:
+    if current_time - last_message_time < settings.MAX_MESSAGE_PER_SECOND:
         if not user_data['warning_sent']:
             await event.answer('Слишком много сообщений! Попробуйте позже.')
             user_data['warning_sent'] = True 

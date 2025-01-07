@@ -1,6 +1,7 @@
 from typing import Sequence, List, Dict
 
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from asgiref.sync import sync_to_async
 
 
@@ -8,7 +9,12 @@ class AsyncBaseManager(models.Manager):
     """Базовый асинхронный менеджер модели"""
     @sync_to_async
     def aget(self, *args, **kwargs):
-        return super().get(*args, **kwargs)
+        try:
+            obj = super().get(*args, **kwargs)
+        except ObjectDoesNotExist:
+            obj = None
+            
+        return obj
     
     @sync_to_async
     def acreate(self, **kwargs):
