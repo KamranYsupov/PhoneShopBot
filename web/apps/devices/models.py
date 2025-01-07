@@ -2,8 +2,10 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
-from web.db.model_mixins import AsyncBaseModel
-
+from web.db.model_mixins import (
+    AsyncBaseModel,
+    QuantityMixin,
+)
 
 class DeviceCompany(AsyncBaseModel):
     """Модель компании устройства"""
@@ -70,7 +72,7 @@ class DeviceSeries(AsyncBaseModel):
         return self.name
     
     
-class Device(AsyncBaseModel):
+class Device(AsyncBaseModel, QuantityMixin):
     """Модель устройства"""
     name = models.CharField(
         _('Название'),
@@ -78,7 +80,8 @@ class Device(AsyncBaseModel):
         unique=True,
         db_index=True,
     )
-    price = models.FloatField(_('Цена'))
+    price_from_1 = models.FloatField(_('Цена от 1 шт'))
+    price_from_20 = models.FloatField(_('Цена от 20 шт'))
     
     series = models.ForeignKey(
         'devices.DeviceSeries',

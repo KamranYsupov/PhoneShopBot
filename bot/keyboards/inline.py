@@ -15,3 +15,13 @@ def get_inline_keyboard(*, buttons: Dict[str, str], sizes: Tuple = (1, 2)):
 inline_cancel_keyboard = get_inline_keyboard(
     buttons={'Отмена ❌': 'cancel'}
 )
+inline_menu_keyboard = get_inline_keyboard(
+    buttons={
+        'Посмотреть цены': 'companies_1',
+        'Поиск': 'search',
+        'Корзина': 'cart',
+        'Мои заказы': 'my_orders',
+        'FAQ': 'faq',
+        'Связаться с менеджером': 'manager',
+    }
+)

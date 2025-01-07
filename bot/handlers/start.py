@@ -2,8 +2,8 @@
 from aiogram import Router, types
 from aiogram.filters import CommandStart, Command, CommandObject
 
-from keyboards.inline import get_inline_keyboard
-from web.apps.telegram_users.models import TelegramUser
+from keyboards.inline import inline_menu_keyboard
+from models import TelegramUser
 
 router = Router()
 
@@ -13,29 +13,35 @@ async def start_command_handler(
     message: types.Message,
     command: CommandObject,
 ):
-    telegram_user = await TelegramUser.objects.aget(id=command.args)
+    telegram_user_id = command.args if command.args \
+        else message.from_user.id
+    telegram_user = await TelegramUser.objects.aget(
+        telegram_id=telegram_user_id
+    )
     if (
-        not telegram_user 
+        (not telegram_user) 
         or 
-        telegram_user.telegram_id != message.from_user.id
+        (telegram_user.telegram_id and \
+        telegram_user.telegram_id != message.from_user.id)
     ):
+        
         await message.answer('Неправильная ссылка')
-        return
-    
+        return             
+        
     telegram_user.telegram_id = message.from_user.id
     telegram_user.username = message.from_user.username
     await telegram_user.asave()
-    
-    buttons = {
-        'Посмотреть цены': 'companies',
-        'Поиск': 'search',
-    }
-    await message.answer(
-        f'Привет, {telegram_user.fio}',
-        reply_markup=get_inline_keyboard(
-            buttons=buttons,
-        )
+
+    message_text = (
+        f'Привет, {telegram_user.fio}.'
     )
+    await message.answer(
+        message_text,
+        reply_markup=inline_menu_keyboard
+    )
+    return 
+    
+    
     
     
     

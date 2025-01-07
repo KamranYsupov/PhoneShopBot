@@ -112,6 +112,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 BOT_USERNAME = os.getenv('BOT_USERNAME')
 BOT_LINK = f'https://t.me/{BOT_USERNAME}'
-MAX_MESSAGE_PER_SECOND = os.getenv('MAX_MESSAGE_PER_SECOND', 1)
+MAX_MESSAGE_PER_SECOND = int(os.getenv('MAX_MESSAGE_PER_SECOND', 1))
 
 TELEGRAM_API_URL = 'https://api.telegram.org'
