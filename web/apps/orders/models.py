@@ -62,7 +62,7 @@ class Order(AsyncBaseModel):
         super().clean()
         if not self.items.all():
             raise ValidationError(
-                'В заказ должен быть добавлен хотя бы 1 элемент'
+                'В заказе должен быть добавлен хотя бы 1 элемент'
             )
 
     def __str__(self):
