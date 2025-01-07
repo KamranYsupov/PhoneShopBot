@@ -15,8 +15,10 @@ async def start_command_handler(
 ):
     telegram_user_id = command.args if command.args \
         else message.from_user.id
+    
+    id_field = 'id' if isinstance(telegram_user_id, str) else 'telegram_id'     
     telegram_user = await TelegramUser.objects.aget(
-        id=telegram_user_id
+        **{id_field: telegram_user_id}
     )
     if (
         (not telegram_user) 
