@@ -1,3 +1,5 @@
+from datetime import date 
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
@@ -35,6 +37,7 @@ class Order(AsyncBaseModel):
         max_length=11,
         choices=Status.choices,
         default=Status.ARRIVED,
+        db_index=True,
     )
     buyer = models.ForeignKey(
         'telegram_users.TelegramUser', 
@@ -46,6 +49,11 @@ class Order(AsyncBaseModel):
         _('Комментарий'),
         max_length=150,
         blank=True,
+    )
+    created_at = models.DateField(
+        _('Дата'),
+        default=date.today,
+        db_index=True,
     )
 
     class Meta:

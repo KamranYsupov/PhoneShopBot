@@ -1,17 +1,23 @@
+from datetime import datetime, date
+
 import loguru
 from aiogram import Router, types, F
 from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from asgiref.sync import sync_to_async
+from django.utils import timezone
 
-from keyboards.inline import get_inline_keyboard
+from keyboards.inline import (
+    get_inline_keyboard,
+)
 from keyboards.reply import (
     get_reply_keyboard,
     reply_keyboard_remove,
-    reply_cancel_keyboard
+    reply_cancel_keyboard,
+    get_reply_calendar_keyboard
 )
-from .state import OrderState
+from .state import OrderState, DateState
 from orm.orders import create_order
 from models import (
     TelegramUser,
@@ -22,6 +28,9 @@ from models import (
 )
 from utils.bot import edit_text_or_answer
 from utils.message import get_order_message_and_buttons
+from utils.pagination import Paginator, get_pagination_buttons
+from utils.calendar import get_all_months
+from utils.validators import get_integer_from_string
 
 router = Router()
 
@@ -106,8 +115,9 @@ async def complete_create_order_handler(
             'превышает количество на складе'
         )
     else:
-        return
-
+        await callback.message.delete()
+        return 
+    
     await edit_text_or_answer(
         message,
         text=message_text,
@@ -119,10 +129,160 @@ async def complete_create_order_handler(
     )
         
 
-        
+@router.callback_query(F.data.startswith('my_orders_'))
+async def my_orders_callback_handler(
+    callback: types.CallbackQuery,
+):
+    page_number = int(callback.data.split('_')[-1])
+    per_page = 5
     
+    now = timezone.now()
+    current_year = now.year
+    
+    years = sorted(
+        list(range(2025, current_year + 1)),
+        reverse=True
+    )
+    paginator = Paginator(
+        array=years,
+        page_number=page_number,
+        per_page=per_page
+    )
+    buttons = {
+        str(year): f'year_my_orders_{year}' 
+        for year in paginator.get_page()
+    }
+    sizes = (1,) * per_page
+    pagination_buttons = get_pagination_buttons(
+        paginator, prefix='my_orders'
+    )
+    if len(pagination_buttons.items()) == 1:
+        sizes += (1, 1)
+    else:
+        sizes += (2, 1)
         
+    buttons.update(pagination_buttons)
+    buttons['Вернуться в меню 📁'] = 'menu'
         
+    await callback.message.edit_text(
+        'Выберите год',
+        reply_markup=get_inline_keyboard(
+            buttons=buttons,
+            sizes=sizes,
+        )
+    )
+    
+    
+@router.callback_query(F.data.startswith('year_my_orders_'))
+async def my_orders_year_callback_handler(
+    callback: types.CallbackQuery,
+):
+    year = int(callback.data.split('_')[-1])
+    now = timezone.now()
+    
+    months_names = get_all_months()
+    
+    if year == now.year:
+        months_names = months_names[:now.month]
+    
+    buttons = {
+        month_name: f'calendar_my_orders_{month_index + 1}_{year}'
+        for month_index, month_name in enumerate(months_names)
+    }  
+    buttons['Вернуться в меню 📁'] = 'menu'
+    
+    sizes = (1,) * (len(buttons))  
+    
+    await callback.message.edit_text(
+        'Выберите месяц',
+        reply_markup=get_inline_keyboard(
+            buttons=buttons,
+            sizes=sizes,
+        )
+    )
+    
+    
+@router.callback_query(F.data.startswith('calendar_my_orders_'))
+async def my_orders_calendar_callback_handler(
+    callback: types.CallbackQuery,
+    state: FSMContext,
+):
+    month, year = map(int, callback.data.split('_')[-2:])
+    
+    await state.set_state(DateState.day)
+    await state.update_data(year=year, month=month)
+    
+    await callback.message.delete()
+    await callback.message.answer(
+        'Выберите дату',
+        reply_markup=get_reply_calendar_keyboard(
+            year=year,
+            month=month,
+        )
+    )
+    
+    
+@router.message(F.text, DateState.day)
+async def my_orders_day_callback_handler(
+    message: types.Message,
+    state: FSMContext,
+):
+    day = get_integer_from_string(message.text)
+    
+    if not day:
+        await message.answer('Пожалуйста, выберите день из календаря')
+        return
         
-        
+    state_data = await state.get_data()
+    order_date = date(
+        state_data['year'],
+        state_data['month'], 
+        day
+    )
+    formated_order_date = order_date.strftime("%d.%m.%Y")
+    
+    telegram_user = await TelegramUser.objects.aget(
+        telegram_id=message.from_user.id
+    )
+    orders = await Order.objects.afilter(
+        buyer=telegram_user,
+        created_at=order_date,
+    )
+    
+    if not orders:
+        await message.answer(
+            f'{formated_order_date} нет заказов.'
+        )
+    else:
+        message_text = ''
+        order_items_map = await OrderItem.objects.afilter(
+            order_id__in=[order.id for order in orders],
+            select_relations=('device', )
+        )
+
+        order_items_dict = {}
+        for item in order_items_map:
+            if item.order_id not in order_items_dict:
+                order_items_dict[item.order_id] = []
+            order_items_dict[item.order_id].append(item)
+
+        message_text = ''
+
+        for order in orders:
+            order_items = order_items_dict.get(order.id, [])
+            order_message_text, _ = get_order_message_and_buttons(order_items)
+            message_text += (
+                f'<b>#{order.number}</b>\n\n'
+                f'{order_message_text}\n\n'
+            )
+
+        message_text = (
+            f'Заказы на день {formated_order_date}\n\n'
+            + message_text
+        )
+
+        await message.answer(
+            message_text,
+            parse_mode='HTML',
+        )
         

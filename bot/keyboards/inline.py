@@ -21,7 +21,7 @@ inline_menu_keyboard = get_inline_keyboard(
         'Посмотреть цены': 'companies_1',
         'Поиск': 'search',
         'Корзина': 'cart',
-        'Мои заказы': 'my_orders',
+        'Мои заказы': 'my_orders_1',
         'FAQ': 'faq',
         'Связаться с менеджером': 'manager',
     }

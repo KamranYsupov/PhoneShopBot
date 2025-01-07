@@ -54,11 +54,13 @@ def create_order(
         if invalid_cart_items:
             order.delete()
             return invalid_cart_items
-
-        if updated_devices:
-            Device.objects.bulk_update(updated_devices, ['quantity'])
-        if order_items:
-            OrderItem.objects.bulk_create(order_items)
+            
+        if not order_items:
+            order.delete()
+            return
+        
+        Device.objects.bulk_update(updated_devices, ['quantity'])
+        OrderItem.objects.bulk_create(order_items)
         CartItem.objects.filter(
             telegram_user_id=telegram_user.id
         ).delete()

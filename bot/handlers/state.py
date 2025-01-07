@@ -10,3 +10,8 @@ class OrderState(StatesGroup):
     comment = State()
 
 
+class DateState(StatesGroup):
+    year = State()
+    month = State() 
+    day = State() 
+
