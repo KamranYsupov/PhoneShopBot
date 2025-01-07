@@ -56,6 +56,8 @@ class Order(AsyncBaseModel):
             
             self.number = (max_value or 0) + 1  # Увеличиваем на 1, если max_value None
             
+        super.save(**args, **kwargs)
+            
     def clean(self):
         super().clean()
         if not self.items.all():
