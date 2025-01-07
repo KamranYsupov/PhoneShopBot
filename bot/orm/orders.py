@@ -13,7 +13,8 @@ from orm.cart import clear_cart
 
 @sync_to_async
 def create_order(
-    telegram_id: TelegramUser.telegram_id
+    telegram_id: TelegramUser.telegram_id,
+    comment: str | None = None,
 ) -> Order | list[CartItem] | None:
     try:
         telegram_user = (
@@ -29,7 +30,11 @@ def create_order(
     updated_devices = []
 
     with transaction.atomic():
-        order = Order.objects.create(buyer_id=telegram_user.id)
+        order_data = {'buyer_id': telegram_user.id}
+        if comment:
+            order_data['comment'] = comment
+            
+        order = Order.objects.create(**order_data)
 
         for cart_item in telegram_user.cart.all():
             device = cart_item.device
