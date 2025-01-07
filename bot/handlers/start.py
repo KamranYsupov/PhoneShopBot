@@ -16,7 +16,7 @@ async def start_command_handler(
     telegram_user_id = command.args if command.args \
         else message.from_user.id
     telegram_user = await TelegramUser.objects.aget(
-        telegram_id=telegram_user_id
+        id=telegram_user_id
     )
     if (
         (not telegram_user) 
