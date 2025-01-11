@@ -2,6 +2,7 @@
 import os
 
 import django
+from django.conf import settings
 import loguru
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -13,11 +14,10 @@ async def main():
 
     django.setup()
 
-    from core import config
     from middlewares.throttling import rate_limit_middleware
     from handlers.routing import get_main_router
 
-    bot = Bot(token=config.BOT_TOKEN, default=DefaultBotProperties())
+    bot = Bot(token=settings.BOT_TOKEN, default=DefaultBotProperties())
     dp = Dispatcher()
     
     try:

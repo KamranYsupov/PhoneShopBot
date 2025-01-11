@@ -2,8 +2,6 @@
 
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
-from core import config
-
 
 def get_inline_keyboard(*, buttons: Dict[str, str], sizes: Tuple = (1, 2)):
     keyboard = InlineKeyboardBuilder()
