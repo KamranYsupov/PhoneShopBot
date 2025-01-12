@@ -4,7 +4,8 @@ from django.conf import settings
 
 from web.db.model_mixins import (
     AsyncBaseModel,
-    AbstractTelegramUser
+    AbstractTelegramUser,
+    QuantityMixin
 )
 
 
@@ -27,11 +28,11 @@ class TelegramUser(AbstractTelegramUser):
     )
 
     class Meta:
-        verbose_name = _('Пользователь')
-        verbose_name_plural = _('Пользователи')
+        verbose_name = _('пользователь')
+        verbose_name_plural = _('Telegram пользователи')
 
     def __str__(self):
-        return f'{self.fio} {self.id}'
+        return f'{self.fio} {self.phone_number}'
     
     def save(self, *args, **kwargs):
         if self._state.adding: # Если создаем объект 
@@ -40,17 +41,19 @@ class TelegramUser(AbstractTelegramUser):
         return super().save(*args, **kwargs)
         
 
-class Cart:
+class CartItem(AsyncBaseModel, QuantityMixin):
+    """Модель элемента корзины"""
     telegram_user = models.ForeignKey(
-        TelegramUser, 
+        'telegram_users.TelegramUser', 
         on_delete=models.CASCADE,
         related_name='cart'
     )
-    phone_product = models.ForeignKey(
-        'phones.PhoneProduct', 
+    device = models.ForeignKey(
+        'devices.Device', 
         on_delete=models.CASCADE,
-        related_name='cart'
+        verbose_name=_('Устройство')
     )
-    quantity = models.PositiveBigIntegerField(
-        verbose_name=_('Количество')
-    )
+    
+    class Meta:
+        verbose_name = _('элемент корзины')
+        verbose_name_plural = _('корзина')
