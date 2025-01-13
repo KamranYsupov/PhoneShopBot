@@ -19,6 +19,12 @@ class DeviceSeriesInline(admin.TabularInline):
     
 class DeviceInline(admin.TabularInline):
     model = Device
+    fields = (
+        'name',
+        'quantity', 
+        'price_from_1',
+        'price_from_20'
+    )
     extra = 1
 
      

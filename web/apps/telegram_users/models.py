@@ -57,3 +57,16 @@ class CartItem(AsyncBaseModel, QuantityMixin):
     class Meta:
         verbose_name = _('элемент корзины')
         verbose_name_plural = _('корзина')
+        
+    @property
+    def general_price(self) -> int:
+        general_price = self.price_for_one
+        
+        return general_price * self.quantity
+       
+    @property 
+    def price_for_one(self) -> int:
+        price_for_one = self.device.price_from_1 \
+            if self.quantity < 20 else self.device.price_from_20
+        
+        return price_for_one   
