@@ -24,7 +24,8 @@ async def cart_callback_handler(
         telegram_user_id=telegram_user.id,
         select_relations=('device', )
     )
-    buttons = {'Вернуться в меню 📁': 'menu'}
+    
+    buttons = {}
     
     cart_data = {}
     for cart_item in cart:
@@ -36,9 +37,10 @@ async def cart_callback_handler(
         cart_item = cart_data[device_id]
         cart_price += cart_item.general_price
         
-        cart_item_info = \
+        message_text += \
             f'{index + 1}) {get_cart_item_info_message(cart_item)}\n\n'
-        message_text += cart_item_info
+            
+        buttons[cart_item.device.name] = f'dev_{cart_item.device_id}_1_1'
         
     if not message_text:
         message_text += 'Ваша корзина пуста.'
@@ -46,13 +48,59 @@ async def cart_callback_handler(
         message_text = (
             '<b>Корзина:</b>\n\n' + 
             message_text +
-            f'\nИтого: <b>{cart_price} руб</b>'
+            f'Итого: <b>{cart_price} руб</b>'
         )
+        buttons.update({
+            'Создать заказ 📝': 'create_order',
+            'Очистить корзину 🧹': 'ask_clear_cart',
+        })
         
+    buttons['Вернуться в меню 📁'] = 'menu'
+    
     await callback.message.edit_text(
         message_text,
         reply_markup=get_inline_keyboard(
             buttons=buttons,
+            sizes=(1,) * (len(buttons) - 2) + (2, ) 
+        ),
+        parse_mode='HTML',
+    )
+    
+    
+@router.callback_query(F.data == 'ask_clear_cart')
+async def ask_clear_cart_callback_handler(
+    callback: types.CallbackQuery,
+):  
+    buttons = {
+        'Да': 'clear_cart',
+        'Нет': 'cart',
+    }
+    
+    await callback.message.edit_text(
+        '<b>Вы уверены?</b>',
+        reply_markup=get_inline_keyboard(
+            buttons=buttons,
+            sizes=(2, )
+        ),
+        parse_mode='HTML',
+    )
+    
+    
+@router.callback_query(F.data == 'clear_cart')
+async def clear_cart_callback_handler(
+    callback: types.CallbackQuery,
+):
+    telegram_user = await TelegramUser.objects.aget(
+        telegram_id=callback.from_user.id
+    )
+    cart = await CartItem.objects.filter(
+        telegram_user_id=telegram_user.id,
+    ).adelete()
+        
+    await callback.message.edit_text(
+        '<b>Корзина успешно очищена ✅</b>',
+        reply_markup=get_inline_keyboard(
+            buttons={'Вернуться в меню 📁': 'menu'},
         ),
         parse_mode='HTML',
     )

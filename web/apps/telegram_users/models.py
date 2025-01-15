@@ -58,6 +58,21 @@ class CartItem(AsyncBaseModel, QuantityMixin):
         verbose_name = _('элемент корзины')
         verbose_name_plural = _('корзина')
         
+    def save(self, *args, **kwargs):
+        if not self._state.adding: # Если не создаем объект
+            return super().save(*args, **kwargs) 
+        
+        same_cart_item = CartItem.objects.filter(
+            telegram_user_id=self.telegram_user_id,
+            device_id=self.device.id
+        ).first()
+        
+        if not same_cart_item:
+            return super().save(*args, **kwargs)
+        
+        same_cart_item.quantity += self.quantity
+        same_cart_item.save()       
+        
     @property
     def general_price(self) -> int:
         general_price = self.price_for_one
