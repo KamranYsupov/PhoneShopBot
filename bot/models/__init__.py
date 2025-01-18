@@ -12,7 +12,7 @@ __all__ = (
 
 from web.apps.telegram_users.models import (
     TelegramUser,
-    CartItem
+    CartItem,
 )
 from web.apps.orders.models import Order, OrderItem
 from web.apps.devices.models import (

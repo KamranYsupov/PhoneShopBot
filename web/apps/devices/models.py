@@ -80,8 +80,8 @@ class Device(AsyncBaseModel, QuantityMixin):
         unique=True,
         db_index=True,
     )
-    price_from_1 = models.FloatField(_('Цена от 1 шт'))
-    price_from_20 = models.FloatField(_('Цена от 20 шт'))
+    price_from_1 = models.PositiveBigIntegerField(_('Цена от 1 шт'))
+    price_from_20 = models.PositiveBigIntegerField(_('Цена от 20 шт'))
     
     series = models.ForeignKey(
         'devices.DeviceSeries',

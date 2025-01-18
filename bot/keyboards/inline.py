@@ -18,13 +18,13 @@ inline_cancel_keyboard = get_inline_keyboard(
 )
 inline_menu_keyboard = get_inline_keyboard(
     buttons={
-        'Посмотреть цены': 'companies_1',
-        'Поиск': 'search',
-        'Корзина': 'cart',
-        'Мои заказы': 'my_orders',
-        'FAQ': 'faq',
-        'Связаться с менеджером': 'manager',
-    }
+        'Посмотреть цены 🗂': 'companies_1',
+        'Корзина 🛒': 'cart',
+        'Мои заказы 📦': 'my_orders_1',
+        'FAQ ❓': 'faq',
+        'Связаться с менеджером ☎️': 'manager',
+    },
+    sizes=(1, 2, 1, 1)
 )
 
 
