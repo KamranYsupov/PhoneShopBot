@@ -10,6 +10,7 @@ from web.db.model_mixins import (
     AsyncBaseModel,
     QuantityMixin,
 )
+from web.services.telegram_service import telegram_service
 
 
 class Order(AsyncBaseModel):
@@ -20,14 +21,14 @@ class Order(AsyncBaseModel):
         BOUGHT = 'BOUGHT'
         ASSEMBLED = 'ASSEMBLED'
         КNOCKED_OUT = 'КNOCKED_OUT'
-        CANCEL = 'CANCEL'
+        CANCELED = 'CANCELED'
         
         choices = (
             (ARRIVED, _('Прибыл')),
             (BOUGHT, _('Куплен')),
             (ASSEMBLED, _('Собран')),
             (КNOCKED_OUT, _('Выбит')),
-            (CANCEL, _('Отменён')),
+            (CANCELED, _('Отменён')),
         )
 
 
@@ -59,6 +60,7 @@ class Order(AsyncBaseModel):
     class Meta:
         verbose_name = _('заказ')
         verbose_name_plural = _('заказы')
+        ordering = ['-created_at']
         
     def save(self, *args, **kwargs):
         if self._state.adding:  # Если объект новый
@@ -69,7 +71,24 @@ class Order(AsyncBaseModel):
             
             self.number = (max_value or 0) + 1  # Увеличиваем на 1, если max_value None
             
+            super().save(*args, **kwargs)
+            return 
+        
+        if self.status == Order.Status.CANCELED:
+            inline_keyboard = [[
+                {
+                    'text': 'Открыть заказ',
+                    'callback_data': f'order_{self.id}'
+                }
+            ]]
+            telegram_service.send_message(
+                chat_id=self.buyer.telegram_id,
+                text=f'Заказ <b>#{self.number}</b> отменён.',
+                reply_markup={'inline_keyboard': inline_keyboard}
+            )
+            
         super().save(*args, **kwargs)
+        
 
     def __str__(self):
         return str(self.number)

@@ -72,7 +72,7 @@ async def search_devices(
         )
     else:
         await inline_query.answer(
-            results[offset:next_offset], 
+            results, 
             cache_time=1,
             is_personal=True,
             next_offset=str(offset + 50)
