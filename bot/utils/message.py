@@ -19,8 +19,8 @@ def get_device_info_message(
             f'<b>Уже в корзине:</b> <em>{cart_quantity}</em>\n\n'
             
     device_info_message += (
-        f'<b>От 1 шт:</b> <em>{device.price_from_1}</em> <b>₽</b>\n'
-        f'<b>От 20 шт:</b> <em>{device.price_from_20}</em> <b>₽</b>\n'
+        f'<b>От 1 шт:</b> <em>{device.price_from_1}</em> <b>$</b>\n'
+        f'<b>От 20 шт:</b> <em>{device.price_from_20}</em> <b>$</b>\n'
     )
     
     return device_info_message
@@ -33,7 +33,7 @@ def get_item_info_message(item: CartItem | OrderItem) -> str:
     return (
         f'<b>{item.device.name}</b>\n'
         f'<em>◦ <b>{item.quantity} шт</b> × <b>{price_for_one_string}</b>'
-        f' = <b>{general_price_string} руб</b></em>'
+        f' = <b>{general_price_string} $</b></em>'
     )
 
 
@@ -52,7 +52,7 @@ def get_message_and_buttons(
         if is_cart:
             buttons[item.device.name] = f'dev_{item.device_id}_1_1'
             
-    total_price_label = f'Итого: <b>{total_price} руб</b>'
+    total_price_label = f'Итого: <b>{total_price} $</b>'
     
     if is_cart:
         if not message_text:
