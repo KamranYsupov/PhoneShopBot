@@ -1,15 +1,22 @@
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.http import HttpResponse
+from django.contrib.admin.views.decorators import staff_member_required
 
-from .service import export_devices_to_excel
+from .service import import_devices_from_excel
 
+@staff_member_required
+def upload_devices_excel(request):
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
 
-def download_devices_excel(request):
-    excel_file = export_devices_to_excel()
+        try:
+            import_devices_from_excel(excel_file)
 
-    response = HttpResponse(
-        excel_file,
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    response['Content-Disposition'] = 'attachment; filename="devices.xlsx"'
+            messages.success(request, 'Данные успешно загружены в базу данных.')
+        except Exception as e:
+            messages.error(request, f'Ошибка при обработке файла: {str(e)}')
 
-    return response
+        return redirect('admin:devices_device_changelist') 
+
+    return HttpResponse("Метод не поддерживается.", status=405)

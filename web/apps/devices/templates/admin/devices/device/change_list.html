@@ -1,8 +1,12 @@
 {% extends "admin/change_list.html" %}
 
 {% block object-tools-items %}
-    {{ block.super }}
+    {{ block.super }}  {# Стандартные кнопки админки #}
     <li>
-        <a href="{% url 'export_devices' %}" class="button">Выгрузка в Excel ⬇️</a>
+        <form action="{% url 'upload_devices_excel' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="excel_file" accept=".xlsx" required>
+            <button type="submit" class="button">Загрузить из Excel</button>
+        </form>
     </li>
 {% endblock %}
