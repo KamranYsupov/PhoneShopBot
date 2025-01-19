@@ -58,6 +58,12 @@ class CartItem(AsyncBaseModel, QuantityMixin):
         verbose_name = _('элемент корзины')
         verbose_name_plural = _('корзина')
         
+    def __str__(self):
+        return (
+            f'Элемент корзины пользователя {self.telegram_user.fio} | '
+            f'{self.device.name} × {self.quantity}'
+        )
+        
     def save(self, *args, **kwargs):
         if not self._state.adding: # Если не создаем объект
             return super().save(*args, **kwargs) 

@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import download_devices_excel  # Импортируйте ваш view
+from .views import upload_devices_excel
 
 urlpatterns = [
-    path('export-devices/', download_devices_excel, name='export_devices'),
+    path('upload-devices-excel/', upload_devices_excel, name='upload_devices_excel'),
 ]

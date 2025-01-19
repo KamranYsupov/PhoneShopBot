@@ -111,6 +111,12 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
         verbose_name = _('элемент заказа')
         verbose_name_plural = _('элементы заказа')
         
+    def __str__(self):
+        return (
+            f'Элемент заказа {self.order.number} | '
+            f'{self.device.name} × {self.quantity}'
+        )
+        
     def save(self, *args, **kwargs):
         if self.device.quantity < self.quantity:
             return 

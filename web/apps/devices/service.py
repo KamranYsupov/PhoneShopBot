@@ -1,6 +1,6 @@
 import pandas as pd
 from io import BytesIO
-from .models import Device  # Импортируйте вашу модель Device
+from .models import Device, DeviceSeries, DeviceModel, DeviceCompany
 
 
 def export_devices_to_excel(file_name=None):
@@ -19,13 +19,13 @@ def export_devices_to_excel(file_name=None):
     
     for device in devices:
         data.append({
-            'Компания': device.series.model.company.name,
-            'Модель': device.series.model.name,
-            'Серия': device.series.name,
-            'Устройство': device.name,
-            'Цена от 1': device.price_from_1,
-            'Цена от 20': device.price_from_20,
-            'Количество': device.quantity
+            'company': device.series.model.company.name,
+            'model': device.series.model.name,
+            'series': device.series.name,
+            'device': device.name,
+            'price_from_1': device.price_from_1,
+            'price_from_20': device.price_from_20,
+            'quantity': device.quantity
         })
 
     df = pd.DataFrame(data)
@@ -40,3 +40,23 @@ def export_devices_to_excel(file_name=None):
 
     excel_data = output.getvalue()
     return excel_data
+
+
+def import_devices_from_excel(excel_file):
+    """Функция для импрота в данных из excel таблицы в бд"""
+    df = pd.read_excel(excel_file)
+
+    for index, row in df.iterrows():
+        company, _ = DeviceCompany.objects.get_or_create(name=row['company'])
+        model, _ = DeviceModel.objects.get_or_create(name=row['model'], company=company)
+        series, _ = DeviceSeries.objects.get_or_create(name=row['series'], model=model)
+
+        Device.objects.update_or_create(
+            name=row['device'],
+            defaults={
+                'series': series,
+                'price_from_1': row['price_from_1'],
+                'price_from_20': row['price_from_20'],
+                'quantity': row['quantity']
+            }
+        )
