@@ -113,7 +113,7 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
         
     def __str__(self):
         return (
-            f'Элемент заказа {self.order.number} | '
+            f'#{self.order.number} | '
             f'{self.device.name} × {self.quantity}'
         )
         

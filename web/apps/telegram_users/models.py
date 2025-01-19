@@ -60,7 +60,7 @@ class CartItem(AsyncBaseModel, QuantityMixin):
         
     def __str__(self):
         return (
-            f'Элемент корзины пользователя {self.telegram_user.fio} | '
+            f'{self.telegram_user.fio} | '
             f'{self.device.name} × {self.quantity}'
         )
         
