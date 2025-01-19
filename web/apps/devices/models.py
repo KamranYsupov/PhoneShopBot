@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
+from django.core.validators import MinValueValidator
 
 from web.db.model_mixins import (
     AsyncBaseModel,
@@ -80,8 +81,14 @@ class Device(AsyncBaseModel, QuantityMixin):
         unique=True,
         db_index=True,
     )
-    price_from_1 = models.PositiveBigIntegerField(_('Цена от 1 шт'))
-    price_from_20 = models.PositiveBigIntegerField(_('Цена от 20 шт'))
+    price_from_1 = models.FloatField(
+        _('Цена от 1 шт'),
+        validators=[MinValueValidator(0.0)]
+    )
+    price_from_20 = models.FloatField(
+        _('Цена от 20 шт'),
+        validators=[MinValueValidator(0.0)]
+    )
     
     series = models.ForeignKey(
         'devices.DeviceSeries',
