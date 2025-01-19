@@ -3,7 +3,10 @@ from aiogram import Router, types, F
 from aiogram.filters import StateFilter, CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
 
-from keyboards.inline import inline_menu_keyboard
+from keyboards.inline import (
+    get_inline_keyboard,
+    get_inline_menu_keyboard
+)
 from keyboards.reply import reply_start_keyboard
 from models import TelegramUser
 
@@ -23,7 +26,20 @@ async def menu_handler(
         
     await message_method(
         'Выберите пункт меню.',
-        reply_markup=inline_menu_keyboard
+        reply_markup=get_inline_menu_keyboard()
+    )
+    
+    
+@router.callback_query(F.data == 'faq')
+async def faq_callback_handler(callback: types.CallbackQuery):
+    with open('FAQ.txt', 'r', encoding='utf-8') as file:
+        message_text = file.read()
+        
+    await callback.message.edit_text(
+        text=message_text,
+        reply_markup=get_inline_keyboard(
+            buttons={'Назад 🔙': 'menu'}, 
+        ),
     )
     
     

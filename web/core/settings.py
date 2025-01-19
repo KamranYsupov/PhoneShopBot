@@ -114,4 +114,6 @@ BOT_USERNAME = os.getenv('BOT_USERNAME')
 BOT_LINK = f'https://t.me/{BOT_USERNAME}'
 MAX_MESSAGE_PER_SECOND = int(os.getenv('MAX_MESSAGE_PER_SECOND', 1))
 
+MANAGER_ACCOUNT_LINK = os.getenv('MANAGER_ACCOUNT_LINK')
+
 TELEGRAM_API_URL = 'https://api.telegram.org'
