@@ -7,6 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.exceptions import TelegramBadRequest
 from asgiref.sync import sync_to_async
 from django.utils import timezone
+from django.db.models import Q
 
 from keyboards.inline import (
     get_inline_keyboard,
@@ -244,9 +245,13 @@ async def my_orders_day_callback_handler(
     telegram_user = await TelegramUser.objects.aget(
         telegram_id=message.from_user.id
     )
-    orders = await Order.objects.afilter(
-        buyer=telegram_user,
-        created_at=order_date,
+    orders = await sync_to_async(list)(
+        Order.objects.exclude(
+            status__in=[Order.Status.ARRIVED, Order.Status.CANCELED]
+        ).filter(
+            buyer=telegram_user,
+            created_at=order_date
+        )
     )
     
     if not orders:
@@ -285,4 +290,28 @@ async def my_orders_day_callback_handler(
             message_text,
             parse_mode='HTML',
         )
+            
         
+@router.callback_query(F.data.startswith('order_'))
+async def order_callback_handler(
+    callback: types.CallbackQuery,
+):
+    order_id = callback.data.split('_')[-1]
+    
+    order = await Order.objects.aget(id=order_id)
+    order_items = await OrderItem.objects.afilter(
+        order_id=order.id,
+        select_relations=('device', )
+    )
+    order_message_text, _ = get_order_message_and_buttons(order_items)
+    message_text = (
+        f'<b>#{order.number}</b>\n\n'
+        f'{order_message_text}\n'
+    )
+    
+    await callback.message.edit_text(
+        message_text,
+        parse_mode='HTML'
+    )
+    
+    

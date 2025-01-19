@@ -1,5 +1,7 @@
+import os
+
 import loguru
-from aiogram import Router, types, F
+from aiogram import Router, types, F, Bot
 from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from asgiref.sync import sync_to_async
@@ -11,6 +13,11 @@ from keyboards.inline import (
 )
 from utils.message import get_device_info_message
 from utils.validators import validate_quantity
+from utils.pagination import (
+    Paginator, 
+    get_pagination_buttons,
+    get_pagination_sizes
+)
 from models import (
     TelegramUser, 
     CartItem,
@@ -21,6 +28,7 @@ from models import (
 )
 from .state import CartItemState
 from orm.cart import add_to_cart, get_cart_quantity
+from web.apps.devices.service import export_devices_to_excel
 
 router = Router()
 
@@ -34,21 +42,60 @@ async def device_companies_callback_query(
     message_text = 'Выберите производителя устройств'
     
     device_companies = await DeviceCompany.objects.a_all()
-    
+    paginator = Paginator(
+        array=device_companies,
+        per_page=per_page,
+        page_number=page_number
+    )
     buttons = {
         company.name: f'com_{company.id}_{page_number}_1'
-        for company in device_companies
+        for company in paginator.get_page()
     }
+    pagination_buttons = get_pagination_buttons(
+        paginator, prefix='companies'
+    )
+    sizes = (1,) * per_page
+    if not pagination_buttons:
+        pass
+    elif len(pagination_buttons.items()) == 1:
+        sizes += (1, 1, 1)
+    else:
+        sizes += (1, 2, 1)
+    
+    buttons['Выгрузка в Excel ⬇️'] = 'excel_devices'
+    buttons.update(pagination_buttons)
     buttons['Назад 🔙'] = 'menu'
     
     await callback.message.edit_text(
         message_text,
         reply_markup=get_inline_keyboard(
             buttons=buttons,
-            sizes=(1, ) * per_page,
+            sizes=sizes,
         ),
         parse_mode='HTML',
     )
+    
+
+@router.callback_query(F.data == 'excel_devices')
+async def export_devices_to_excel_callback_handler(
+    callback: types.CallbackQuery,
+    bot: Bot,
+):
+    await callback.message.edit_text(
+        '<em>Подождите немного ...</em>',
+        parse_mode='HTML',
+    )
+    
+    file_name = 'devices.xlsx'
+    await sync_to_async(export_devices_to_excel)(file_name)
+    file_input = types.FSInputFile(file_name)
+    
+    await callback.message.delete()
+    await bot.send_document(
+        callback.message.chat.id, file_input
+    )
+    
+    os.remove(file_name)
     
     
 @router.callback_query(F.data.startswith('com_'))
@@ -63,18 +110,31 @@ async def device_company_callback_query(
     company = await DeviceCompany.objects.aget(id=company_id)
     message_text = f'Список моделей <b>{company.name}</b>:'
     device_models = await sync_to_async(list)(company.models.all())
-    
+
+    paginator = Paginator(
+        array=device_models,
+        per_page=per_page,
+        page_number=page_number
+    )
     buttons = {
         model.name: f'mod_{model.id}_{page_number}_1'
-        for model in device_models
-    }
+        for model in paginator.get_page()
+    }    
+    pagination_buttons = get_pagination_buttons(
+        paginator, prefix=f'com_{company_id}_{previous_page_number}'
+    )
+    sizes = (1,) * per_page + get_pagination_sizes(
+        pagination_buttons
+    )
+        
+    buttons.update(pagination_buttons)
     buttons['Назад 🔙'] = f'companies_{previous_page_number}'
         
     await callback.message.edit_text(
         message_text,
         reply_markup=get_inline_keyboard(
             buttons=buttons,
-            sizes=(1, ) * per_page,
+            sizes=sizes,
         ),
         parse_mode='HTML',
     )
@@ -92,19 +152,32 @@ async def device_model_callback_query(
     model = await DeviceModel.objects.aget(id=model_id)
     message_text = f'Выберите серию <b>{model.name}</b>'
     device_series = await sync_to_async(list)(model.series.all()) 
+    paginator = Paginator(
+        array=device_series,
+        per_page=per_page,
+        page_number=page_number
+    )
     
     buttons = {
         series.name: f'ser_{series.id}_{page_number}_1'
-        for series in device_series
+        for series in paginator.get_page()
     }
+    pagination_buttons = get_pagination_buttons(
+        paginator, prefix=f'mod_{model_id}_{previous_page_number}'
+    )
+    sizes = (1,) * per_page + get_pagination_sizes(
+        pagination_buttons
+    )
+    
+    buttons.update(pagination_buttons)
     buttons['Назад 🔙'] = \
-        f'com_{model.company_id}_{previous_page_number}_{page_number}'
+        f'com_{model.company_id}_1_{previous_page_number}'
         
     await callback.message.edit_text(
         message_text,
         reply_markup=get_inline_keyboard(
             buttons=buttons,
-            sizes=(1, ) * per_page,
+            sizes=sizes,
         ),
         parse_mode='HTML',
     )
@@ -125,20 +198,31 @@ async def device_series_callback_query(
     series = await DeviceSeries.objects.aget(id=series_id)
     message_text = f'Список устройств <b>{series.name}</b>:'
     devices = await sync_to_async(list)(series.devices.all()) 
-    
+    paginator = Paginator(
+        array=devices,
+        per_page=per_page,
+        page_number=page_number
+    )
     buttons = {
         device.name: f'dev_{device.id}_{page_number}_1'
-        for device in devices
+        for device in paginator.get_page()
     }
+    pagination_buttons = get_pagination_buttons(
+        paginator, prefix=f'ser_{series_id}_{previous_page_number}'
+    )
+    sizes = (1,) * per_page + get_pagination_sizes(
+        pagination_buttons
+    )
     
+    buttons.update(pagination_buttons)
     buttons['Назад 🔙'] = \
-        f'mod_{series.model_id}_{previous_page_number}_{page_number}'
+        f'mod_{series.model_id}_1_{previous_page_number}'
         
     await callback.message.edit_text(
         message_text,
         reply_markup=get_inline_keyboard(
             buttons=buttons,
-            sizes=(1, ) * per_page,
+            sizes=sizes,
         ),
         parse_mode='HTML',
     )
@@ -175,7 +259,7 @@ async def device_callback_query(
         buttons = {
             'Вернутся в меню 📁': 'menu',
             'Назад 🔙': \
-                f'ser_{device.series_id}_{previous_page_number}_{page_number}'
+                f'ser_{device.series_id}_1_{previous_page_number}'
         }
         reply_markup = get_inline_keyboard(
             buttons=buttons,

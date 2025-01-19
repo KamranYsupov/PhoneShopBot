@@ -34,6 +34,17 @@ def get_pagination_buttons(paginator: Paginator, prefix: str) -> dict:
     if paginator.has_next():
         buttons['След. ▶️'] = f'{prefix}_{paginator.page_number + 1}'
     
-    
-        
+
     return buttons
+
+
+def get_pagination_sizes(pagination_buttons: dict) -> tuple:
+    if not pagination_buttons:
+        sizes = (1, )
+    elif len(pagination_buttons.items()) == 1:
+        sizes = (1, 1)
+    else:
+        sizes = (2, 1)
+    
+
+    return sizes
