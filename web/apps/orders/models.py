@@ -60,7 +60,7 @@ class Order(AsyncBaseModel):
     class Meta:
         verbose_name = _('заказ')
         verbose_name_plural = _('заказы')
-        ordering = ['-created_at']
+        ordering = ['-number']
         
     def save(self, *args, **kwargs):
         if self._state.adding:  # Если объект новый

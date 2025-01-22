@@ -28,7 +28,10 @@ from models import (
     OrderItem
 )
 from utils.bot import edit_text_or_answer
-from utils.message import get_order_message_and_buttons
+from utils.message import (
+    get_order_message_and_buttons, 
+    get_item_info_message
+)
 from utils.pagination import Paginator, get_pagination_buttons
 from utils.calendar import get_all_months
 from utils.validators import get_integer_from_string
@@ -260,32 +263,32 @@ async def my_orders_day_callback_handler(
         )
     else:
         message_text = ''
-        order_items_map = await OrderItem.objects.afilter(
+        order_items = await OrderItem.objects.afilter(
             order_id__in=[order.id for order in orders],
             select_relations=('device', )
         )
-
-        order_items_dict = {}
-        for item in order_items_map:
-            if item.order_id not in order_items_dict:
-                order_items_dict[item.order_id] = []
-            order_items_dict[item.order_id].append(item)
-
-        message_text = ''
+        order_devices_data = {}
         total_orders_price = 0
-
-        for order in orders:
-            order_items = order_items_dict.get(order.id, [])
-            order_message_text, _ = get_order_message_and_buttons(order_items)
-            message_text += (
-                f'<b>#{order.number}</b>\n\n'
-                f'{order_message_text}\n\n'
-            )
+        
+        for order_item in order_items:
+            if not order_devices_data.get(order_item.device.id):
+                order_devices_data[order_item.device.id] = []
+                
+            order_devices_data[order_item.device.id].append(order_item) 
+            total_orders_price += order_item.general_price
             
-        total_orders_price = sum([
-            item.general_price 
-            for item in order_items_map
-        ])
+            
+        count = 1 
+        for device_id in order_devices_data:
+            items = order_devices_data[device_id]
+            
+            message_text += f'{count}) <b>{items[0].device.name}</b>\n'
+            for item in items:
+                message_text += \
+                    ''.join(get_item_info_message(item).split('\n')[1:]) # Убираем первую строчку
+                    
+            message_text += '\n\n'
+        
         message_text += f'Общая сумма: <b>{total_orders_price} $</b>'
 
         message_text = (
