@@ -1,4 +1,4 @@
-import os
+﻿import os
 
 import loguru
 from aiogram import Router, types, F, Bot
@@ -263,7 +263,7 @@ async def add_to_cart_message_handler(
     state: FSMContext,
 ):
     state_data = await state.get_data()
-    previous_page_number = state_data['previous_page_number']
+    previous_page_number = state_data.get('previous_page_number', 1)
     device = await Device.objects.aget(id=state_data['device_id'])
     
     quantity = await validate_quantity(
