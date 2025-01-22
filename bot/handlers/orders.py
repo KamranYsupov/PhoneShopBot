@@ -22,7 +22,10 @@ from .state import OrderState, DateState
 from orm.orders import create_order
 from models import (
     TelegramUser,
-    Device, 
+    Device,
+    DeviceCompany,
+    DeviceModel,
+    DeviceSeries, 
     CartItem, 
     Order, 
     OrderItem
@@ -30,7 +33,8 @@ from models import (
 from utils.bot import edit_text_or_answer
 from utils.message import (
     get_order_message_and_buttons, 
-    get_item_info_message
+    get_item_info_message,
+    get_order_items_info_message
 )
 from utils.pagination import Paginator, get_pagination_buttons
 from utils.calendar import get_all_months
@@ -225,7 +229,7 @@ async def my_orders_calendar_callback_handler(
         )
     )
     
-    
+                    
 @router.message(F.text, DateState.day)
 async def my_orders_day_callback_handler(
     message: types.Message,
@@ -262,41 +266,12 @@ async def my_orders_day_callback_handler(
             f'{formated_order_date} нет заказов.'
         )
     else:
-        message_text = ''
-        order_items = await OrderItem.objects.afilter(
-            order_id__in=[order.id for order in orders],
-            select_relations=('device', )
-        )
-        order_devices_data = {}
-        total_orders_price = 0
-        
-        for order_item in order_items:
-            if not order_devices_data.get(order_item.device.id):
-                order_devices_data[order_item.device.id] = []
-                
-            order_devices_data[order_item.device.id].append(order_item) 
-            total_orders_price += order_item.general_price
-            
-            
-        count = 1 
-        for device_id in order_devices_data:
-            items = order_devices_data[device_id]
-            
-            message_text += f'{count}) <b>{items[0].device.name}</b>\n'
-            for item in items:
-                message_text += \
-                    ''.join(get_item_info_message(item).split('\n')[1:]) # Убираем первую строчку
-                    
-            message_text += '\n\n'
-            count += 1
-        
-        message_text += f'Общая сумма: <b>{total_orders_price} $</b>'
-
+        message_text = await get_order_items_info_message(orders)
         message_text = (
             f'Заказы на день {formated_order_date}\n\n'
             + message_text
         )
-
+        
         await message.answer(
             message_text,
             parse_mode='HTML',
