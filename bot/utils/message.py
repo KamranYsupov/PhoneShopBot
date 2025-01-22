@@ -30,10 +30,15 @@ def get_item_info_message(item: CartItem | OrderItem) -> str:
     price_for_one_string = get_formated_digit_string(item.price_for_one, ' ')
     general_price_string = get_formated_digit_string(item.general_price, ' ')
     
+    if isinstance(item, CartItem):
+        format_tag = 'em'
+    else:
+        format_tag = 'blockquote'
+        
     return (
         f'<b>{item.device.name}</b>\n'
-        f'<em>◦ <b>{item.quantity} шт</b> × <b>{price_for_one_string}</b>'
-        f' = <b>{general_price_string} $</b></em>'
+        f'<{format_tag}>◦ <b>{item.quantity} шт</b> × <b>{price_for_one_string}</b>'
+        f' = <b>{general_price_string} $</b></{format_tag}>'
     )
 
 
