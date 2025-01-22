@@ -50,19 +50,6 @@ def get_inline_menu_keyboard():
     
     return keyboard.adjust(1, 2, 1, 1).as_markup()
 
-
-def get_device_inline_keyboard(device_id: Device.id):
-    buttons = {
-        'Убрать из корзины 🗑': f'rm_from_cart_{device_id}',
-        'Корзина 🛒': 'cart',
-        'Вернуться в меню 📁': 'menu',
-    }
-    
-    return get_inline_keyboard(
-        buttons=buttons,
-        sizes=(1, 1, 1)
-    )
-    
     
 inline_cancel_keyboard = get_inline_keyboard(
     buttons={'Отмена ❌': 'cancel'}

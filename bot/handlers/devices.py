@@ -9,7 +9,6 @@ from asgiref.sync import sync_to_async
 from keyboards.inline import (
     get_inline_keyboard,
     inline_cancel_keyboard,
-    get_device_inline_keyboard
 )
 from utils.message import get_device_info_message
 from utils.validators import validate_quantity
@@ -250,21 +249,29 @@ async def device_callback_query(
     message_text = get_device_info_message(device, cart_quantity)
     message_text += '\nУкажите количество.'
     
-    await state.update_data(device_id=device_id)
+    await state.update_data(
+        device_id=device_id,
+        previous_page_number=previous_page_number
+    )
     await state.set_state(CartItemState.quantity)
     
+    buttons = {}
     if cart_quantity:
-        reply_markup = get_device_inline_keyboard(device.id)
-    else:
-        buttons = {
-            'Вернутся в меню 📁': 'menu',
-            'Назад 🔙': \
-                f'ser_{device.series_id}_1_{previous_page_number}'
-        }
-        reply_markup = get_inline_keyboard(
-            buttons=buttons,
-            sizes=(1, 1, 1)
-        )
+        buttons.update({
+            'Убрать из корзины 🗑': f'rm_from_cart_{device_id}',
+            'Корзина 🛒': 'cart',
+        })
+    
+    buttons.update({
+        'Назад 🔙': \
+            f'ser_{device.series_id}_1_{previous_page_number}',
+        'Вернутся в меню 📁': 'menu',
+    })
+    
+    reply_markup = get_inline_keyboard(
+        buttons=buttons,
+        sizes=(1, ) * 4
+    )
         
     await callback.message.edit_text(
         message_text,
@@ -279,6 +286,7 @@ async def add_to_cart_message_handler(
     state: FSMContext,
 ):
     state_data = await state.get_data()
+    previous_page_number = state_data['previous_page_number']
     device = await Device.objects.aget(id=state_data['device_id'])
     
     quantity = await validate_quantity(
@@ -309,9 +317,21 @@ async def add_to_cart_message_handler(
         cart_item.quantity
     )
     message_text += '\nУкажите количество.'
+    
+    buttons = {
+        'Убрать из корзины 🗑': f'rm_from_cart_{device.id}',
+        'Корзина 🛒': 'cart',
+        'Назад 🔙': \
+            f'ser_{device.series_id}_1_{previous_page_number}',
+        'Вернутся в меню 📁': 'menu',
+    }
+    
 
     await message.answer(
         message_text,
-        reply_markup=get_device_inline_keyboard(device.id),
+        reply_markup=get_inline_keyboard(
+            buttons=buttons,
+            sizes=(1, ) * 4
+        ),
         parse_mode='HTML',
     )
