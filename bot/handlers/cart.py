@@ -33,7 +33,6 @@ async def cart_callback_handler(
         page_number=page_number
     )
     
-    print(paginator.get_page())
     message_text, buttons = get_cart_message_and_buttons(
         paginator.get_page(),
         start_index=((per_page * page_number) - per_page) + 1
