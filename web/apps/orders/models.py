@@ -108,7 +108,7 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
     )
     
     class Meta:
-        verbose_name = _('элемент заказа')
+        verbose_name = _(' ')
         verbose_name_plural = _('элементы заказа')
         
     def __init__(self, *args, **kwargs):
@@ -117,7 +117,6 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
         
     def __str__(self):
         return (
-            f'#{self.order.number} | '
             f'{self.device.name} × {self.quantity}'
         )
         
