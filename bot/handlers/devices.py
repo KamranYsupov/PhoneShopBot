@@ -61,7 +61,6 @@ async def device_companies_callback_query(
     else:
         sizes += (1, 2, 1)
     
-    buttons['Выгрузка в Excel ⬇️'] = 'excel_devices'
     buttons.update(pagination_buttons)
     buttons['Назад 🔙'] = 'menu'
     
@@ -73,29 +72,7 @@ async def device_companies_callback_query(
         ),
         parse_mode='HTML',
     )
-    
 
-@router.callback_query(F.data == 'excel_devices')
-async def export_devices_to_excel_callback_handler(
-    callback: types.CallbackQuery,
-    bot: Bot,
-):
-    await callback.message.edit_text(
-        '<em>Подождите немного ...</em>',
-        parse_mode='HTML',
-    )
-    
-    file_name = 'devices.xlsx'
-    await sync_to_async(export_devices_to_excel)(file_name)
-    file_input = types.FSInputFile(file_name)
-    
-    await callback.message.delete()
-    await bot.send_document(
-        callback.message.chat.id, file_input
-    )
-    
-    os.remove(file_name)
-    
     
 @router.callback_query(F.data.startswith('com_'))
 async def device_company_callback_query(
