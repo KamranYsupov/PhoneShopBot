@@ -1,4 +1,4 @@
-from django.db import models
+﻿from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -30,7 +30,6 @@ class DeviceModel(AsyncBaseModel):
     name = models.CharField(
         _('Название'),
         max_length=100,
-        unique=True,
         db_index=True,
     )
     
@@ -54,7 +53,6 @@ class DeviceSeries(AsyncBaseModel):
     name = models.CharField(
         _('Название'),
         max_length=100,
-        unique=True,
         db_index=True,
     )
     
@@ -78,7 +76,6 @@ class Device(AsyncBaseModel, QuantityMixin):
     name = models.CharField(
         _('Название'),
         max_length=200,
-        unique=True,
         db_index=True,
     )
     price_from_1 = models.FloatField(
