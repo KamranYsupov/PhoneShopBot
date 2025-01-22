@@ -1,4 +1,4 @@
-import loguru
+﻿import loguru
 from aiogram import Router, types, F
 from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
@@ -32,9 +32,9 @@ async def cart_callback_handler(
         per_page=per_page,
         page_number=page_number
     )
-    
+    page_cart_items = paginator.get_page()
     message_text, buttons = get_cart_message_and_buttons(
-        paginator.get_page(),
+        page_cart_items,
         start_index=((per_page * page_number) - per_page) + 1
     )
     pagination_buttons = get_pagination_buttons(
@@ -44,11 +44,14 @@ async def cart_callback_handler(
     
     sizes += (1, 2) if len(pagination_buttons) == 1 else (2, 2)
     buttons.update(pagination_buttons)
-    buttons.update({
-        'Создать заказ 📝': 'create_order',
-        'Очистить корзину 🧹': 'ask_clear_cart',
-        'Вернуться в меню 📁': 'menu'
-    })
+    
+    if page_cart_items:
+        buttons.update({
+            'Создать заказ 📝': 'create_order',
+            'Очистить корзину 🧹': 'ask_clear_cart',
+        })
+
+    buttons['Вернуться в меню 📁'] = 'menu'
     
     await callback.message.edit_text(
         message_text,
