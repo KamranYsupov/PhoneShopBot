@@ -1,4 +1,4 @@
-from datetime import datetime, date
+﻿from datetime import datetime, date
 
 import loguru
 from aiogram import Router, types, F
@@ -288,6 +288,7 @@ async def my_orders_day_callback_handler(
                     ''.join(get_item_info_message(item).split('\n')[1:]) # Убираем первую строчку
                     
             message_text += '\n\n'
+            count += 1
         
         message_text += f'Общая сумма: <b>{total_orders_price} $</b>'
 
