@@ -57,9 +57,9 @@ async def device_companies_callback_query(
     if not pagination_buttons:
         pass
     elif len(pagination_buttons.items()) == 1:
-        sizes += (1, 1, 1)
+        sizes += (1, 1)
     else:
-        sizes += (1, 2, 1)
+        sizes += (2, 1)
     
     buttons.update(pagination_buttons)
     buttons['Назад 🔙'] = 'menu'
