@@ -272,6 +272,7 @@ async def my_orders_day_callback_handler(
             order_items_dict[item.order_id].append(item)
 
         message_text = ''
+        total_orders_price = 0
 
         for order in orders:
             order_items = order_items_dict.get(order.id, [])
@@ -280,6 +281,12 @@ async def my_orders_day_callback_handler(
                 f'<b>#{order.number}</b>\n\n'
                 f'{order_message_text}\n\n'
             )
+            
+        total_orders_price = sum([
+            item.general_price 
+            for item in order_items_map
+        ])
+        message_text += f'Общая сумма: <b>{total_orders_price} $</b>'
 
         message_text = (
             f'Заказы на день {formated_order_date}\n\n'
