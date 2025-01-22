@@ -111,6 +111,10 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
         verbose_name = _('элемент заказа')
         verbose_name_plural = _('элементы заказа')
         
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__quantity = self.quantity
+        
     def __str__(self):
         return (
             f'#{self.order.number} | '
@@ -118,11 +122,12 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
         )
         
     def save(self, *args, **kwargs):
-        if self.device.quantity < self.quantity:
-            return 
+        if (self.device.quantity < self.quantity
+            and self.__quantity <= self.quantity):   
+            return
 
         if not self._state.adding: # Если не создаем объект
-            return super().save(*args, **kwargs) 
+            return super().save(*args, **kwargs)
         
         same_order_item = OrderItem.objects.filter(
             order_id=self.order_id,
@@ -136,7 +141,8 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
         same_order_item.save()   
         
     def clean(self):
-        if self.device.quantity < self.quantity:
+        if (self.device.quantity < self.quantity
+            and self.__quantity <= self.quantity):   
             raise ValidationError(
                 _(f'Количество {self.device.name} '
                   'превышает количесто товара на складе')

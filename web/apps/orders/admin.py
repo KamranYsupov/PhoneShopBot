@@ -6,7 +6,11 @@ from .models import Order, OrderItem
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     fields = ('device', 'quantity')
+    readonly_fields = ('device', 'quantity')
     extra = 1
+    
+    def has_add_permission(self, request, obj=None):
+        return False
     
     
 @admin.register(Order)
@@ -17,6 +21,14 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = [
         'number__iregex'
     ]
-    readonly_fields = ('number', 'created_at',)
+    readonly_fields = (
+        'number',
+        'buyer', 
+        'comment',
+        'created_at',
+    )
     
     inlines = (OrderItemInline, )
+    
+    def has_add_permission(self, request):
+        return False 
