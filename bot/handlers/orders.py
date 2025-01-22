@@ -94,7 +94,7 @@ async def complete_create_order_handler(
         
     result = await create_order(**create_order_data)
     buttons = {
-        'Корзина 🛒': 'cart',
+        'Корзина 🛒': 'cart_1',
         'Вернуться в меню 📁': 'menu'
     }
     

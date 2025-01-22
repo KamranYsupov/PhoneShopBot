@@ -236,7 +236,7 @@ async def device_callback_query(
     if cart_quantity:
         buttons.update({
             'Убрать из корзины 🗑': f'rm_from_cart_{device_id}',
-            'Корзина 🛒': 'cart',
+            'Корзина 🛒': 'cart_1',
         })
     
     buttons.update({
@@ -297,7 +297,7 @@ async def add_to_cart_message_handler(
     
     buttons = {
         'Убрать из корзины 🗑': f'rm_from_cart_{device.id}',
-        'Корзина 🛒': 'cart',
+        'Корзина 🛒': 'cart_1',
         'Назад 🔙': \
             f'ser_{device.series_id}_1_{previous_page_number}',
         'Вернутся в меню 📁': 'menu',

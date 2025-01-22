@@ -57,18 +57,22 @@ def get_item_info_message(item: CartItem | OrderItem) -> str:
 
 def get_message_and_buttons(
     items: Sequence[Union[CartItem, OrderItem]], 
-    is_cart: bool = True
+    is_cart: bool = True,
+    start_index: int = 1,
 ) -> tuple[str, dict]:
     buttons = {}
     message_text = ''
     total_price = 0
     
-    for index, item in enumerate(items):
+    index = start_index
+    for item in items:
         total_price += item.general_price
-        message_text += f'{index + 1}) {get_item_info_message(item)}\n\n'
+        message_text += f'{index}) {get_item_info_message(item)}\n\n'
         
         if is_cart:
             buttons[item.device.name] = f'dev_{item.device_id}_1_1'
+            
+        index += 1
             
     total_price_label = f'Итого: <b>{total_price} $</b>'
     
@@ -80,36 +84,36 @@ def get_message_and_buttons(
                 f'<b>Корзина:</b>\n\n{message_text}'
                 + total_price_label
             )
-            buttons.update({
-                'Создать заказ 📝': 'create_order',
-                'Очистить корзину 🧹': 'ask_clear_cart',
-            })
     else:
         message_text += total_price_label
-        buttons['Корзина 🛒'] = 'cart'
-    
-    
-    buttons['Вернуться в меню 📁'] = 'menu'
-    
+        buttons['Корзина 🛒'] = 'cart_1'
+
     return message_text, buttons
 
 
 def get_cart_message_and_buttons(
-    cart_items: Sequence[CartItem]
+    cart_items: Sequence[CartItem],
+    start_index: int = 1,
 ) -> tuple[str, dict]:
     return get_message_and_buttons(
         cart_items, 
-        is_cart=True
+        is_cart=True,
+        start_index=start_index,
     )
 
 
 def get_order_message_and_buttons(
-    order_items: Sequence[OrderItem]
+    order_items: Sequence[OrderItem],
+    start_index: int = 1,
 ) -> tuple[str, dict]:
-    return get_message_and_buttons(
+    message_text, buttons = get_message_and_buttons(
         order_items, 
-        is_cart=False
+        is_cart=False,
+        start_index=start_index,
     )
+    buttons['Вернуться в меню 📁'] = 'menu'
+    
+    return message_text, buttons
     
     
 @sync_to_async

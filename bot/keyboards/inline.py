@@ -25,7 +25,7 @@ def get_inline_menu_keyboard():
     keyboard.add(
         InlineKeyboardButton(
             text='Корзина 🛒',
-            callback_data='cart'
+            callback_data='cart_1'
         )
     )
     keyboard.add(
