@@ -1,0 +1,18 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+<li>
+    <form action="{% url 'change_bot_status' %}" method="get">
+        {% csrf_token %}
+        <button type="submit" class="button">
+            {% if bot_is_active %}
+                Выключить
+            {% else %}
+                Включить  
+            {% endif %}
+        бота
+        </button>
+    </form>
+</li>
+    {{ block.super }}  {# Стандартные кнопки админки #}
+{% endblock %}

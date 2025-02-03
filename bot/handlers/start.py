@@ -2,8 +2,8 @@
 from aiogram import Router, types
 from aiogram.filters import CommandStart, Command, CommandObject
 
-from keyboards.reply import reply_start_keyboard
-from models import TelegramUser
+from bot.keyboards.reply import reply_start_keyboard
+from bot.models import TelegramUser
 
 router = Router()
 

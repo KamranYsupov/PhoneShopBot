@@ -29,5 +29,14 @@ class TelegramUserAdmin(admin.ModelAdmin):
         'bot_start_link',
     )
     
+    def change_list_view(self, request, extra_context=None):
+        print('change_list_view')
+        my_custom_data = "Это мои данные"
+
+        extra_context = extra_context or {}
+        extra_context['my_custom_data'] = my_custom_data
+
+        return super().change_list_view(request, extra_context=extra_context)
+    
     inlines = (CartItemInline, )    
  

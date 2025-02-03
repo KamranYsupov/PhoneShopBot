@@ -3,17 +3,17 @@ from aiogram import Router, types, F
 from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
 
-from utils.message import get_device_info_message
-from orm.cart import get_cart_quantity
-from keyboards.inline import get_inline_keyboard
-from models import (
+from bot.utils.message import get_device_info_message
+from bot.orm.cart import get_cart_quantity
+from bot.keyboards.inline import get_inline_keyboard
+from bot.models import (
     TelegramUser,
     Device, 
     CartItem, 
     Order, 
     OrderItem
 )
-from .state import CartItemState
+from bot.handlers.state import CartItemState
 
 router = Router()
         

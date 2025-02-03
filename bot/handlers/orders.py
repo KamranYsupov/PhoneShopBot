@@ -9,18 +9,18 @@ from asgiref.sync import sync_to_async
 from django.utils import timezone
 from django.db.models import Q
 
-from keyboards.inline import (
+from bot.keyboards.inline import (
     get_inline_keyboard,
 )
-from keyboards.reply import (
+from bot.keyboards.reply import (
     get_reply_keyboard,
     reply_keyboard_remove,
     reply_cancel_keyboard,
     get_reply_calendar_keyboard
 )
-from .state import OrderState, DateState
-from orm.orders import create_order
-from models import (
+from bot.handlers.state import OrderState, DateState
+from bot.orm.orders import create_order
+from bot.models import (
     TelegramUser,
     Device,
     DeviceCompany,
@@ -30,15 +30,15 @@ from models import (
     Order, 
     OrderItem
 )
-from utils.bot import edit_text_or_answer
-from utils.message import (
+from bot.utils.bot import edit_text_or_answer
+from bot.utils.message import (
     get_order_message_and_buttons, 
     get_item_info_message,
     get_order_items_info_message
 )
-from utils.pagination import Paginator, get_pagination_buttons
-from utils.calendar import get_all_months
-from utils.validators import get_integer_from_string
+from bot.utils.pagination import Paginator, get_pagination_buttons
+from bot.utils.calendar import get_all_months
+from bot.utils.validators import get_integer_from_string
 
 router = Router()
 

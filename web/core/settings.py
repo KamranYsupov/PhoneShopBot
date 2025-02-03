@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'web.apps.telegram_users',
     'web.apps.devices',
     'web.apps.orders',
+    'web.apps.bot_settings'
 ]
 
 MIDDLEWARE = [
@@ -62,7 +63,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'web.core.wsgi.application'
-
 
 
 DATABASES = {
@@ -117,3 +117,4 @@ MAX_MESSAGE_PER_SECOND = int(os.getenv('MAX_MESSAGE_PER_SECOND', 1))
 MANAGER_ACCOUNT_LINK = os.getenv('MANAGER_ACCOUNT_LINK')
 
 TELEGRAM_API_URL = 'https://api.telegram.org'
+

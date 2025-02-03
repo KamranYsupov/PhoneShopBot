@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from asgiref.sync import sync_to_async
 
-from models import (
+from bot.models import (
     TelegramUser,
     Device,
     DeviceCompany,
@@ -13,7 +13,7 @@ from models import (
     Order, 
     OrderItem
 )
-from utils.sort import sort_objects_by_parent
+from bot.utils.sort import sort_objects_by_parent
 
 
 def get_device_info_message(

@@ -3,7 +3,7 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 from django.conf import settings
 
-from models import Device
+from bot.models import Device
 
 def get_inline_keyboard(*, buttons: Dict[str, str], sizes: Tuple = (1, 2)):
     keyboard = InlineKeyboardBuilder()

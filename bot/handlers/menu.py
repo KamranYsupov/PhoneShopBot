@@ -3,12 +3,12 @@ from aiogram import Router, types, F
 from aiogram.filters import StateFilter, CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
 
-from keyboards.inline import (
+from bot.keyboards.inline import (
     get_inline_keyboard,
     get_inline_menu_keyboard
 )
-from keyboards.reply import reply_start_keyboard
-from models import TelegramUser
+from bot.keyboards.reply import reply_start_keyboard
+from bot.models import TelegramUser
 
 router = Router()
 

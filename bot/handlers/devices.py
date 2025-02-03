@@ -6,18 +6,18 @@ from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from asgiref.sync import sync_to_async
 
-from keyboards.inline import (
+from bot.keyboards.inline import (
     get_inline_keyboard,
     inline_cancel_keyboard,
 )
-from utils.message import get_device_info_message
-from utils.validators import validate_quantity
-from utils.pagination import (
+from bot.utils.message import get_device_info_message
+from bot.utils.validators import validate_quantity
+from bot.utils.pagination import (
     Paginator, 
     get_pagination_buttons,
     get_pagination_sizes
 )
-from models import (
+from bot.models import (
     TelegramUser, 
     CartItem,
     DeviceCompany,
@@ -25,8 +25,8 @@ from models import (
     DeviceSeries, 
     Device
 )
-from .state import CartItemState
-from orm.cart import add_to_cart, get_cart_quantity
+from bot.handlers.state import CartItemState
+from bot.orm.cart import add_to_cart, get_cart_quantity
 from web.apps.devices.service import export_devices_to_excel
 
 router = Router()

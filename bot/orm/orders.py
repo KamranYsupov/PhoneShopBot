@@ -1,14 +1,14 @@
 from asgiref.sync import sync_to_async
 from django.db import transaction
  
-from models import (
+from bot.models import (
     TelegramUser, 
     CartItem,
     Device,
     Order,
     OrderItem
 )
-from orm.cart import clear_cart
+from bot.orm.cart import clear_cart
 
 
 @sync_to_async

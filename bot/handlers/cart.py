@@ -3,10 +3,10 @@ from aiogram import Router, types, F
 from aiogram.filters import CommandStart, Command, CommandObject
 from aiogram.fsm.context import FSMContext
 
-from keyboards.inline import get_inline_keyboard
-from models import TelegramUser, Device, CartItem
-from utils.message import get_cart_message_and_buttons
-from utils.pagination import Paginator, get_pagination_buttons
+from bot.keyboards.inline import get_inline_keyboard
+from bot.models import TelegramUser, Device, CartItem
+from bot.utils.message import get_cart_message_and_buttons
+from bot.utils.pagination import Paginator, get_pagination_buttons
 
 router = Router()
 
