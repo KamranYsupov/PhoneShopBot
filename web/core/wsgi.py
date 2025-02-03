@@ -1,7 +1,7 @@
 import os
 
 from django.core.wsgi import get_wsgi_application
-from django.db.utils import OperationalError
+from django.db.utils. import ProgrammingError
 
 from web.apps.bot_settings.models import BotSettings
     
@@ -13,7 +13,7 @@ try:
     bot_settings = BotSettings.get_instance()
     bot_settings.is_active = True
     bot_settings.save()
-except OperationalError:
+except ProgrammingError
     pass
     
 
