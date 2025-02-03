@@ -19,15 +19,7 @@ def order_post_save(sender, instance, created, **kwargs):
             'если готовы приобрести по более высокой цене, '
             'обратитесь к менеджеру'
         )
-            
-    else:
-        text = (
-            '<b>Заказ принят в обработку 🔥.</b>\n'
-            'С накладкой на сегодняшний день '
-            'вы можете ознакомиться в разделе "Мои заказы".'
-        )
-           
-    inline_keyboard = [[
+        inline_keyboard = [[
         {
             'text': 'Открыть заказ',
             'callback_data': f'order_{instance.id}'
@@ -35,12 +27,12 @@ def order_post_save(sender, instance, created, **kwargs):
     ]]
          
     
-    telegram_service.send_message(
+        telegram_service.send_message(
         chat_id=instance.buyer.telegram_id,
         text=text,
         reply_markup={'inline_keyboard': inline_keyboard}
     )
-    
+            
 
 @receiver(post_delete, sender=Order)
 def order_post_delete(sender, instance, **kwargs):
