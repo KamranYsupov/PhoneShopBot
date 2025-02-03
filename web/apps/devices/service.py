@@ -1,6 +1,12 @@
 import pandas as pd
 from io import BytesIO
-from .models import Device, DeviceSeries, DeviceModel, DeviceCompany
+from .models import (
+    Device,
+    DeviceSeries,
+    DeviceModel,
+    DeviceCompany,
+    Supplier,
+)
 
 
 def export_devices_to_excel(file_name=None):
@@ -23,6 +29,7 @@ def export_devices_to_excel(file_name=None):
             'model': device.series.model.name,
             'series': device.series.name,
             'device': device.name,
+            'supplier': device.supplier,
             'price_from_1': device.price_from_1,
             'price_from_20': device.price_from_20,
             'quantity': device.quantity
@@ -50,10 +57,12 @@ def import_devices_from_excel(excel_file):
         company, _ = DeviceCompany.objects.get_or_create(name=row['company'])
         model, _ = DeviceModel.objects.get_or_create(name=row['model'], company=company)
         series, _ = DeviceSeries.objects.get_or_create(name=row['series'], model=model)
+        supplier, _ = Supplier.objects.get_or_create(name=row['supplier'])
 
         Device.objects.update_or_create(
             name=row['device'],
             defaults={
+                'supplier': supplier,
                 'series': series,
                 'price_from_1': row['price_from_1'],
                 'price_from_20': row['price_from_20'],

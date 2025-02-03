@@ -1,7 +1,13 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.utils.translation import gettext_lazy as _
-from .models import DeviceCompany, DeviceModel, DeviceSeries, Device
+from .models import (
+    DeviceCompany,
+    DeviceModel,
+    DeviceSeries, 
+    Device,
+    Supplier,
+)
 
 class DeviceModelInline(admin.TabularInline):
     model = DeviceModel
@@ -79,10 +85,18 @@ class ModelFilter(SimpleListFilter):
     
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'series', 'quantity', 'price_from_1', 'price_from_20')
+    list_display = ('name', 'series', 'supplier', 'quantity', 'price_from_1', 'price_from_20')
     list_editable = ('quantity', 'price_from_1', 'price_from_20')
-    list_filter = (CompanyFilter, ModelFilter, 'series') 
+    list_filter = (CompanyFilter, ModelFilter, 'series', 'supplier') 
     
+    search_fields = [
+        'name__iregex',
+        'supplier__name__iregex'
+    ]
+    
+    
+@admin.register(Supplier)
+class SupplierAdmin(admin.ModelAdmin):
     search_fields = [
         'name__iregex',
     ]

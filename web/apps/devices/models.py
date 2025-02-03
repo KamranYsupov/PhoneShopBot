@@ -93,6 +93,13 @@ class Device(AsyncBaseModel, QuantityMixin):
         on_delete=models.CASCADE,
         related_name='devices'
     )
+    supplier = models.ForeignKey(
+        'devices.Supplier',
+        verbose_name=_('Поставщик'), 
+        on_delete=models.SET_NULL,
+        related_name='devices',
+        null=True,
+    )
     
     class Meta:
         verbose_name = _('устройство')
@@ -101,5 +108,20 @@ class Device(AsyncBaseModel, QuantityMixin):
     def __str__(self):
         return self.name
 
+
+class Supplier(AsyncBaseModel):
+    """Модель поставщика"""
+    name = models.CharField(
+        _('Имя'),
+        max_length=200,
+        db_index=True,
+    )
+    
+    class Meta:
+        verbose_name = _('поставщик')
+        verbose_name_plural = _('поставщики')
+
+    def __str__(self):
+        return self.name
 
 

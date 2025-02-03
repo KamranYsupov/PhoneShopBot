@@ -71,22 +71,6 @@ class Order(AsyncBaseModel):
             
             self.number = (max_value or 0) + 1  # Увеличиваем на 1, если max_value None
             
-            super().save(*args, **kwargs)
-            return 
-        
-        if self.status == Order.Status.CANCELED:
-            inline_keyboard = [[
-                {
-                    'text': 'Открыть заказ',
-                    'callback_data': f'order_{self.id}'
-                }
-            ]]
-            telegram_service.send_message(
-                chat_id=self.buyer.telegram_id,
-                text=f'Заказ <b>#{self.number}</b> отменён.',
-                reply_markup={'inline_keyboard': inline_keyboard}
-            )
-            
         super().save(*args, **kwargs)
         
 
@@ -121,27 +105,21 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
         )
         
     def save(self, *args, **kwargs):
-        if (self.device.quantity < self.quantity
-            and self.__quantity <= self.quantity):   
-            return
+        if self._state.adding: # Если создаем объект
+            return super().save(*args, **kwargs)
+        
+        if self.quantity > (self.__quantity + self.device.quantity): 
+            return   
+        
+        
+        self.device.quantity += self.__quantity 
+        self.device.quantity -= self.quantity 
+        self.device.save()
 
-        if not self._state.adding: # Если не создаем объект
-            return super().save(*args, **kwargs)
-        
-        same_order_item = OrderItem.objects.filter(
-            order_id=self.order_id,
-            device_id=self.device.id
-        ).first()
-        
-        if not same_order_item:
-            return super().save(*args, **kwargs)
-        
-        same_order_item.quantity += self.quantity
-        same_order_item.save()   
-        
+        super().save(*args, **kwargs)
+            
     def clean(self):
-        if (self.device.quantity < self.quantity
-            and self.__quantity <= self.quantity):   
+        if self.quantity > (self.__quantity + self.device.quantity): 
             raise ValidationError(
                 _(f'Количество {self.device.name} '
                   'превышает количесто товара на складе')

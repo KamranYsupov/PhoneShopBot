@@ -22,6 +22,7 @@ async def main():
     from bot.handlers.routing import get_main_router
     
     dp.message.middleware(is_bot_active_middleware)
+    dp.callback_query.middleware(is_bot_active_middleware)
     dp.message.middleware(rate_limit_middleware)
     dp.include_router(get_main_router())
     

@@ -1,8 +1,8 @@
 import time
-from typing import Dict, Callable
+from typing import Dict, Callable, Union
 
 from loguru import logger
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from django.conf import settings
 from asgiref.sync import sync_to_async
 
@@ -10,7 +10,7 @@ from bot.models import BotSettings
 
 async def is_bot_active_middleware(
     handler: Callable,
-    event: Message,
+    event: Union[Message, CallbackQuery],
     data: Dict
 ):
     """
