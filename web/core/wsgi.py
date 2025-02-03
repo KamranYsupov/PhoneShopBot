@@ -13,7 +13,7 @@ try:
     bot_settings = BotSettings.get_instance()
     bot_settings.is_active = True
     bot_settings.save()
-except ProgrammingError
+except ProgrammingError:
     pass
     
 
