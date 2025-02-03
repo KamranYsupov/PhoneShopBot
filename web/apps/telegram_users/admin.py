@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.conf import settings
+from django.db.utils import OperationalError
 
+from web.apps.bot_settings.models import BotSettings    
 from .models import TelegramUser, CartItem
 
 
@@ -29,14 +31,13 @@ class TelegramUserAdmin(admin.ModelAdmin):
         'bot_start_link',
     )
     
-    def change_list_view(self, request, extra_context=None):
-        print('change_list_view')
-        my_custom_data = "Это мои данные"
+    def changelist_view(self, request, extra_context=None):
+        bot_is_active = BotSettings.get_instance().is_active
 
         extra_context = extra_context or {}
-        extra_context['my_custom_data'] = my_custom_data
+        extra_context['bot_is_active'] = bot_is_active
 
-        return super().change_list_view(request, extra_context=extra_context)
+        return super().changelist_view(request, extra_context=extra_context)
     
     inlines = (CartItemInline, )    
  

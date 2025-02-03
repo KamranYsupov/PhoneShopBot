@@ -1,12 +1,32 @@
 import time
-from typing import Dict, Coroutine
+from typing import Dict, Callable
 
 from loguru import logger
 from aiogram.types import Message
 from django.conf import settings
+from asgiref.sync import sync_to_async
+
+from bot.models import BotSettings    
+
+async def is_bot_active_middleware(
+    handler: Callable,
+    event: Message,
+    data: Dict
+):
+    """
+    Middleware для проверки статуса бота.
+    Если выключен, то вернет None.
+    """
+    bot_settings = await sync_to_async(BotSettings.get_instance)()
+    
+    if not bot_settings.is_active:
+        return None  
+        
+    return await handler(event, data)
+
 
 async def rate_limit_middleware(
-    handler: Coroutine,
+    handler: Callable,
     event: Message,
     data: Dict
 ):

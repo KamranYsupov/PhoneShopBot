@@ -7,6 +7,7 @@ __all__ = (
     'DeviceModel',
     'DeviceSeries', 
     'Device',
+    'BotSettings'
 )
 
 
@@ -21,3 +22,5 @@ from web.apps.devices.models import (
     DeviceSeries, 
     Device
 )
+from web.apps.bot_settings.models import BotSettings    
+

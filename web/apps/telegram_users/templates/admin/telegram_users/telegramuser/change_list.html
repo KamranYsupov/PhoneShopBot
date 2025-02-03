@@ -1,6 +1,7 @@
 {% extends "admin/change_list.html" %}
 
 {% block object-tools-items %}
+<p{{ my_custom_data }}></p>
 <li>
     <form action="{% url 'change_bot_status' %}" method="get">
         {% csrf_token %}
