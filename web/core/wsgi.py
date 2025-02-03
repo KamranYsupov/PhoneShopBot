@@ -1,7 +1,7 @@
 import os
 
 from django.core.wsgi import get_wsgi_application
-from django.db.utils. import ProgrammingError
+from django.db.utils import ProgrammingError
 
 from web.apps.bot_settings.models import BotSettings
     
