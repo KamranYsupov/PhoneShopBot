@@ -31,7 +31,8 @@ INSTALLED_APPS = [
     'web.apps.telegram_users',
     'web.apps.devices',
     'web.apps.orders',
-    'web.apps.bot_settings'
+    'web.apps.bot_settings',
+    'web.apps.notifications',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +65,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'web.core.wsgi.application'
 
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000000
 
 DATABASES = {
     'default': {

@@ -17,7 +17,7 @@ class TelegramService:
     @property
     def __bot_api_url(self):
         return f'{self.api_url}/bot{self.__bot_token}'
-        
+    
     def send_message(
         self,
         chat_id: int,
@@ -25,8 +25,6 @@ class TelegramService:
         reply_markup: dict[str, list] | None = None,
         parse_mode: str = 'HTML',
     ):
-        
-        headers = {'Content-Type': 'application/json'}
         payload = {
             'chat_id': chat_id,
             'text': text,
@@ -38,8 +36,7 @@ class TelegramService:
     
         response = requests.post(
             url=f'{self.__bot_api_url}/sendMessage', 
-            data=json.dumps(payload),
-            headers=headers
+            json=payload,
         )
     
         return response
