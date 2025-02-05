@@ -1,4 +1,4 @@
-from datetime import date 
+﻿from datetime import date 
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -74,6 +74,9 @@ class Order(AsyncBaseModel):
             )['number__max']
             
             self.number = (max_value or 0) + 1  # Увеличиваем на 1, если max_value None
+
+	    super().save(*args, **kwargs)
+	    return 
             
         
         if self.status == Order.Status.CANCELED:
@@ -83,7 +86,7 @@ class Order(AsyncBaseModel):
                 'обратитесь к менеджеру'
             )
         else:   
-            text = '<b>Заказ принят в обработку'
+            text = '<b>Заказ принят в обработку '
             text += (
                 '🔥' 
                 if self.__status != self.status and self.status == self.Status.BOUGHT
