@@ -109,63 +109,66 @@ class Order(AsyncBaseModel):
     
 class OrderItem(AsyncBaseModel, QuantityMixin):
     """Модель элемента заказа"""
+    general_price = models.PositiveBigIntegerField(
+        _('Цена'),
+        default=0 
+    )
+
     order = models.ForeignKey(
-        'orders.Order', 
+        'orders.Order',
         on_delete=models.CASCADE,
         related_name='items'
     )
     device = models.ForeignKey(
-        'devices.Device', 
+        'devices.Device',
         on_delete=models.CASCADE,
         verbose_name=_('Устройство'),
     )
-    
+
     class Meta:
         verbose_name = _(' ')
         verbose_name_plural = _('элементы заказа')
-        
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__quantity = self.quantity
-        
+
     def __str__(self):
         return (
             f'{self.device.name} × {self.quantity}'
         )
-        
+
     def save(self, *args, **kwargs):
-        if self._state.adding: # Если создаем объект
+        if self._state.adding:  # Если создаем объект
+            self.general_price = self.get_general_price() if not self.general_price \
+                else self.general_price
             return super().save(*args, **kwargs)
-        
-        if self.quantity > (self.__quantity + self.device.quantity): 
-            return   
-        
-        
-        self.device.quantity += self.__quantity 
-        self.device.quantity -= self.quantity 
+
+        if self.quantity > (self.__quantity + self.device.quantity):
+            return
+
+        self.device.quantity += self.__quantity
+        self.device.quantity -= self.quantity
         self.device.save()
 
         super().save(*args, **kwargs)
-            
+
     def clean(self):
-        if self.quantity > (self.__quantity + self.device.quantity): 
+        if self.quantity > (self.__quantity + self.device.quantity):
             raise ValidationError(
                 _(f'Количество {self.device.name} '
                   'превышает количесто товара на складе')
             )
-            
-    @property
-    def general_price(self) -> int:
+
+    def get_general_price(self) -> int:
         general_price = self.price_for_one * self.quantity
         return general_price
-       
-    @property 
+
+    @property
     def price_for_one(self) -> int:
         price_for_one = self.device.price_from_1 \
             if self.quantity < 20 else self.device.price_from_20
-        
-        return price_for_one   
-                
-    
+
+        return price_for_one
 
 

@@ -59,6 +59,9 @@ def create_order(
             order.delete()
             return
         
+        for item in order_items:
+            item.general_price = item.get_general_price() # Вручную вычисляем price для каждого обьекта
+        
         Device.objects.bulk_update(updated_devices, ['quantity'])
         OrderItem.objects.bulk_create(order_items)
         CartItem.objects.filter(

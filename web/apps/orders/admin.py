@@ -5,16 +5,26 @@ from .models import Order, OrderItem
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    fields = ('device_supplier', 'device', 'price_string', 'quantity', )
-    readonly_fields = ('device_supplier', 'device', 'price_string')
+    fields = (
+        'device_supplier',
+        'device', 
+        'price_string', 
+        'general_price', 
+        'quantity',
+    )
+    readonly_fields = (
+        'device_supplier', 
+        'device',
+        'price_string'
+    )
     extra = 1
     
     def has_add_permission(self, request, obj=None):
         return False
     
-    @admin.display(description='Цена',)
+    @admin.display(description='Образование цены',)
     def price_string(self, obj):
-        return f'{obj.quantity} шт × {obj.price_for_one} = {obj.general_price} $'
+        return f'{obj.quantity} шт × {obj.price_for_one} = {obj.get_general_price()} $'
     
     @admin.display(description='Поставщик',)
     def device_supplier(self, obj):
