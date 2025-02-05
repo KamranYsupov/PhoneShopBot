@@ -165,7 +165,7 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
             
     @property
     def general_price(self) -> int:
-        general_price = price_for_one * self.quantity
+        general_price = self.price_for_one * self.quantity
         return general_price
        
     @property 
