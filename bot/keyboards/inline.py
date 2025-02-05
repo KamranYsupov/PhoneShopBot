@@ -40,7 +40,12 @@ def get_inline_menu_keyboard():
             switch_inline_query_current_chat=''
         )
     )
-    
+    keyboard.add(
+        InlineKeyboardButton(
+            text='Выгрузка в Excel ⬇️',
+            callback_data='excel_devices'
+        )
+    )
     keyboard.add(
         InlineKeyboardButton(
             text='FAQ ❓',
@@ -54,7 +59,7 @@ def get_inline_menu_keyboard():
         )
     )
     
-    return keyboard.adjust(1, 2, 1, 1, 1).as_markup()
+    return keyboard.adjust(1, 2, 1, 1, 1, 1).as_markup()
 
     
 inline_cancel_keyboard = get_inline_keyboard(

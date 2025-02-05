@@ -312,3 +312,25 @@ async def add_to_cart_message_handler(
         ),
         parse_mode='HTML',
     )
+    
+    
+@router.callback_query(F.data == 'excel_devices')
+async def export_devices_to_excel_callback_handler(
+    callback: types.CallbackQuery,
+    bot: Bot,
+):
+    await callback.message.edit_text(
+        '<em>Подождите немного ...</em>',
+        parse_mode='HTML',
+    )
+    
+    file_name = 'devices.xlsx'
+    await sync_to_async(export_devices_to_excel)(file_name)
+    file_input = types.FSInputFile(file_name)
+    
+    await callback.message.delete()
+    await bot.send_document(
+        callback.message.chat.id, file_input
+    )
+    
+    os.remove(file_name)
