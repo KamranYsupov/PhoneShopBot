@@ -37,7 +37,7 @@ async def device_companies_callback_query(
     callback: types.CallbackQuery
 ):
     page_number = int(callback.data.split('_')[-1])
-    per_page = 5
+    per_page = 10
     message_text = 'Выберите производителя устройств'
     
     device_companies = await DeviceCompany.objects.a_all()
@@ -79,7 +79,7 @@ async def device_company_callback_query(
     callback: types.CallbackQuery
 ):
     page_number = int(callback.data.split('_')[-1])
-    per_page = 5
+    per_page = 10
     previous_page_number = int(callback.data.split('_')[-2])
     company_id = callback.data.split('_')[-3]
 
@@ -121,7 +121,7 @@ async def device_model_callback_query(
     callback: types.CallbackQuery
 ):
     page_number = int(callback.data.split('_')[-1])
-    per_page = 5
+    per_page = 10
     previous_page_number = int(callback.data.split('_')[-2])
     model_id = callback.data.split('_')[-3]
 
@@ -167,7 +167,7 @@ async def device_series_callback_query(
     await state.clear()
     
     page_number = int(callback.data.split('_')[-1])
-    per_page = 5
+    per_page = 10
     previous_page_number = int(callback.data.split('_')[-2])
     series_id = callback.data.split('_')[-3]
 
@@ -210,7 +210,7 @@ async def device_callback_query(
     state: FSMContext,
 ):
     page_number = int(callback.data.split('_')[-1])
-    per_page = 5
+    per_page = 10
     previous_page_number = int(callback.data.split('_')[-2])
     device_id = callback.data.split('_')[-3]
     
