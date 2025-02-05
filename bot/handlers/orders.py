@@ -135,6 +135,9 @@ async def complete_create_order_handler(
         ),
         parse_mode='HTML'
     )
+    await message.answer(
+        '⏳Пожалуйста, подождите. Ваш заказ оформляется...'
+    )
         
 
 @router.callback_query(F.data.startswith('my_orders_'))

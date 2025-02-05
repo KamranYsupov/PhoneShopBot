@@ -19,15 +19,13 @@ class Order(AsyncBaseModel):
     class Status:
         ARRIVED = 'ARRIVED'
         BOUGHT = 'BOUGHT'
-        ASSEMBLED = 'ASSEMBLED'
-        КNOCKED_OUT = 'КNOCKED_OUT'
+        CHANGED = 'CHANGED'
         CANCELED = 'CANCELED'
         
         choices = (
             (ARRIVED, _('Прибыл')),
             (BOUGHT, _('Куплен')),
-            (ASSEMBLED, _('Собран')),
-            (КNOCKED_OUT, _('Выбит')),
+            (CHANGED, _('Изменён')),
             (CANCELED, _('Отменён')),
         )
 
@@ -78,24 +76,17 @@ class Order(AsyncBaseModel):
             super().save(*args, **kwargs)
             return 
             
+        if self.__status == self.status:
+            super().save(*args, **kwargs)
+            return 
         
         if self.status == Order.Status.CANCELED:
-            text = (
-                'К сожалению данной позиции нет в наличии, '
-                'если готовы приобрести по более высокой цене, '
-                'обратитесь к менеджеру'
-            )
-        else:   
-            text = '<b>Заказ принят в обработку '
-            text += (
-                '🔥' 
-                if self.__status != self.status and self.status == self.Status.BOUGHT
-                else 'с изменениями ❌'
-            ) + '.</b>\n'
-            text += (
-                'С накладкой на сегодняшний день '
-                'вы можете ознакомиться в разделе "Мои заказы".'
-            )  
+            text = '❌ Заказ отменён'
+        elif self.status == Order.Status.BOUGHT:
+            text = '✅ Заказ подтвержден'
+        elif self.status == Order.Status.CHANGED:
+            text = '🟨 Заказ подтвержден частично'
+
             
         inline_keyboard = [[
             {
