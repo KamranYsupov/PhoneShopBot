@@ -1,4 +1,4 @@
-import pandas as pd
+﻿import pandas as pd
 from io import BytesIO
 from .models import (
     Device,
@@ -66,6 +66,6 @@ def import_devices_from_excel(excel_file):
                 'series': series,
                 'price_from_1': row['price_from_1'],
                 'price_from_20': row['price_from_20'],
-                'quantity': row['quantity']
+                'quantity': row.get('quantity', 100)
             }
         )
