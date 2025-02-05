@@ -20,7 +20,7 @@ x-function: &base_python
   networks:
     - internal
 
-    
+
 services:
   db:
     container_name: ${PROJECT_NAME}_db
@@ -90,7 +90,7 @@ services:
     container_name: ${PROJECT_NAME}_worker
     build:
       context: .
-    dockerfile: web.dockerfile
+      dockerfile: web.dockerfile
     entrypoint: celery
     links:
       - redis
