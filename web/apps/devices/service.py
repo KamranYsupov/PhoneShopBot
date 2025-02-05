@@ -29,7 +29,6 @@ def export_devices_to_excel(file_name=None):
             'model': device.series.model.name,
             'series': device.series.name,
             'device': device.name,
-            'supplier': device.supplier,
             'price_from_1': device.price_from_1,
             'price_from_20': device.price_from_20,
             'quantity': device.quantity
