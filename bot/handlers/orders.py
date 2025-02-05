@@ -19,7 +19,6 @@ from bot.keyboards.reply import (
     get_reply_calendar_keyboard
 )
 from bot.handlers.state import OrderState, DateState
-from bot.orm.orders import create_order
 from bot.models import (
     TelegramUser,
     Device,
@@ -39,6 +38,7 @@ from bot.utils.message import (
 from bot.utils.pagination import Paginator, get_pagination_buttons
 from bot.utils.calendar import get_all_months
 from bot.utils.validators import get_integer_from_string
+from web.apps.orders.service import create_order_from_cart
 
 router = Router()
 
@@ -92,7 +92,7 @@ async def complete_create_order_handler(
     else:
         comment = 'Без комментария'
         
-    result = await create_order(**create_order_data)
+    result = await sync_to_async(create_order_from_cart)(**create_order_data)
     buttons = {
         'Корзина 🛒': 'cart_1',
         'Вернуться в меню 📁': 'menu'

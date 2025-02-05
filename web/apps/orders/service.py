@@ -1,18 +1,11 @@
-from asgiref.sync import sync_to_async
 from django.db import transaction
- 
-from bot.models import (
-    TelegramUser, 
-    CartItem,
-    Device,
-    Order,
-    OrderItem
-)
-from bot.orm.cart import clear_cart
+
+from web.apps.devices.models import Device
+from web.apps.telegram_users.models import TelegramUser, CartItem
+from .models import Order, OrderItem
 
 
-@sync_to_async
-def create_order(
+def create_order_from_cart(
     telegram_id: TelegramUser.telegram_id,
     comment: str | None = None,
 ) -> Order | list[CartItem] | None:
@@ -28,7 +21,11 @@ def create_order(
     invalid_cart_items = []
     order_items = []
     updated_devices = []
-
+    cart_items = telegram_user.cart.all()
+    
+    if not cart_items:
+        return 
+    
     with transaction.atomic():
         order_data = {'buyer_id': telegram_user.id}
         if comment:
@@ -36,7 +33,7 @@ def create_order(
             
         order = Order.objects.create(**order_data)
 
-        for cart_item in telegram_user.cart.all():
+        for cart_item in cart_items:
             device = cart_item.device
             if device.quantity < cart_item.quantity:
                 invalid_cart_items.append(cart_item)

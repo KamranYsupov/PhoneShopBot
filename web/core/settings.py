@@ -79,6 +79,7 @@ DATABASES = {
 }
 
 
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -110,12 +111,27 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+REDIS_PORT = os.getenv('REDIS_PORT', 6379)
+REDIS_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+
+RABBITMQ_HOST = os.getenv('RABBITMQ_HOST', 'guest:guest@rabbitmq')
+RABBITMQ_PORT = os.getenv('RABBITMQ_PORT', '5672')
+
+CELERY_BROKER_URL = f'{REDIS_URL}/0' 
+CELERY_RESULT_BACKEND = f'{REDIS_URL}/1' 
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
 # Настройки бота
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 BOT_USERNAME = os.getenv('BOT_USERNAME')
 BOT_LINK = f'https://t.me/{BOT_USERNAME}'
 MAX_MESSAGE_PER_SECOND = int(os.getenv('MAX_MESSAGE_PER_SECOND', 1))
-
+ORDER_AUTO_CREATE_MINUTES_INTERVAL = int(os.getenv('ORDER_AUTO_CREATE_MINUTES_INTERVAL', 5))
 MANAGER_ACCOUNT_LINK = os.getenv('MANAGER_ACCOUNT_LINK')
 
 TELEGRAM_API_URL = 'https://api.telegram.org'
