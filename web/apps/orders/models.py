@@ -62,6 +62,10 @@ class Order(AsyncBaseModel):
         verbose_name_plural = _('заказы')
         ordering = ['-number']
         
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__status = self.status
+        
     def save(self, *args, **kwargs):
         if self._state.adding:  # Если объект новый
             # Получаем максимальное значение и увеличиваем его на 1
@@ -71,6 +75,37 @@ class Order(AsyncBaseModel):
             
             self.number = (max_value or 0) + 1  # Увеличиваем на 1, если max_value None
             
+        
+        if self.status == Order.Status.CANCELED:
+            text = (
+                'К сожалению данной позиции нет в наличии, '
+                'если готовы приобрести по более высокой цене, '
+                'обратитесь к менеджеру'
+            )
+        else:   
+            text = '<b>Заказ принят в обработку'
+            text += (
+                '🔥' 
+                if self.__status != self.status and self.status == self.Status.BOUGHT
+                else 'с изменениями ❌'
+            ) + '.</b>\n'
+            text += (
+                'С накладкой на сегодняшний день '
+                'вы можете ознакомиться в разделе "Мои заказы".'
+            )  
+            
+        inline_keyboard = [[
+            {
+                'text': 'Открыть заказ',
+                'callback_data': f'order_{self.id}'
+            }
+        ]]
+        telegram_service.send_message(
+            chat_id=self.buyer.telegram_id,
+            text=text,
+            reply_markup={'inline_keyboard': inline_keyboard}
+        )   
+         
         super().save(*args, **kwargs)
         
 
