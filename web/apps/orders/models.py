@@ -74,8 +74,8 @@ class Order(AsyncBaseModel):
             )['number__max']
             
             self.number = (max_value or 0) + 1  # Увеличиваем на 1, если max_value None
-
-	    super().save(*args, **kwargs)
+            
+            super().save(*args, **kwargs)
 	    return 
             
         
