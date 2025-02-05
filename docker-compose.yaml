@@ -92,6 +92,8 @@ services:
       context: .
       dockerfile: web.dockerfile
     entrypoint: celery
+    networks:
+      - internal
     links:
       - redis
     restart: always
