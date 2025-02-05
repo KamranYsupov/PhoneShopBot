@@ -1,12 +1,12 @@
-from django.contrib import admin
+﻿from django.contrib import admin
 
 from .models import Order, OrderItem
 
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    fields = ('device', 'price_string', 'quantity', )
-    readonly_fields = ('device', 'price_string')
+    fields = ('device_supplier', 'device', 'price_string', 'quantity', )
+    readonly_fields = ('device_supplier', 'device', 'price_string')
     extra = 1
     
     def has_add_permission(self, request, obj=None):
@@ -15,6 +15,10 @@ class OrderItemInline(admin.TabularInline):
     @admin.display(description='Цена',)
     def price_string(self, obj):
         return f'{obj.quantity} шт × {obj.price_for_one} = {obj.general_price} $'
+    
+    @admin.display(description='Поставщик',)
+    def device_supplier(self, obj):
+        return obj.device.supplier.name
     
     
 @admin.register(Order)
