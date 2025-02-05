@@ -76,7 +76,7 @@ class Order(AsyncBaseModel):
             self.number = (max_value or 0) + 1  # Увеличиваем на 1, если max_value None
             
             super().save(*args, **kwargs)
-	    return 
+            return 
             
         
         if self.status == Order.Status.CANCELED:
