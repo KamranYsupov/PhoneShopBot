@@ -1,5 +1,7 @@
 ﻿import pandas as pd
 from io import BytesIO
+from django.db import transaction
+
 from .models import (
     Device,
     DeviceSeries,
@@ -52,24 +54,25 @@ def import_devices_from_excel(excel_file):
     """Функция для импрота в данных из excel таблицы в бд"""
     df = pd.read_excel(excel_file)
 
-    for index, row in df.iterrows():
-        company, _ = DeviceCompany.objects.get_or_create(name=row['company'])
-        model, _ = DeviceModel.objects.get_or_create(name=row['model'], company=company)
-        series, _ = DeviceSeries.objects.get_or_create(name=row['series'], model=model)
-        supplier, _ = Supplier.objects.get_or_create(name=row['supplier'])
+    with transaction.atomic():
+        for index, row in df.iterrows():
+            company, _ = DeviceCompany.objects.get_or_create(name=row['company'])
+            model, _ = DeviceModel.objects.get_or_create(name=row['model'], company=company)
+            series, _ = DeviceSeries.objects.get_or_create(name=row['series'], model=model)
+            supplier, _ = Supplier.objects.get_or_create(name=row['supplier'])
         
-        try:
-            quantity = int(row.get('quantity'))
-        except ValueError:
-            quantity = 100
+            try:
+                quantity = int(row.get('quantity'))
+            except ValueError:
+                quantity = 100
 
-        Device.objects.update_or_create(
-            name=row['device'],
-            defaults={
-                'supplier': supplier,
-                'series': series,
-                'price_from_1': row['price_from_1'],
-                'price_from_20': row['price_from_20'],
-                'quantity': quantity
-            }
-        )
+            Device.objects.update_or_create(
+                name=row['device'],
+                defaults={
+                    'supplier': supplier,
+                    'series': series,
+                    'price_from_1': row['price_from_1'],
+                    'price_from_20': row['price_from_20'],
+                    'quantity': quantity
+                }
+            )
