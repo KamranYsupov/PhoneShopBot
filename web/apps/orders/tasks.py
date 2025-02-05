@@ -24,6 +24,8 @@ def create_order_from_cart_task(
         telegram_id=telegram_id,
         comment=comment
     )
+    if not order: 
+        return 
     order_info_message, buttons = get_order_message_and_buttons(
         order.items.all()
     )

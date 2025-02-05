@@ -4,28 +4,41 @@ from django.utils.html import format_html
 from .models import Order, OrderItem
 from bot.utils.message import get_item_info_message
 
+
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     fields = (
         'device_supplier',
-        'device', 
-        'price_string', 
-        'general_price', 
+        'device',
+        'price_for_one', 
+        'x_string',
         'quantity',
+        'equal_string',
+        'general_price', 
     )
     readonly_fields = (
         'device_supplier', 
         'device',
-        'price_string'
+        'x_string',
+        'equal_string',
+        'general_price',
     )
     extra = 1
     
     def has_add_permission(self, request, obj=None):
         return False
     
-    @admin.display(description='Образование цены',)
-    def price_string(self, obj):
-        return f'{obj.quantity} шт × {obj.price_for_one} = {obj.get_general_price()} $'
+    @admin.display(description='',)
+    def x_string(self, obj):
+        return format_html('<b>×</b>')
+    
+    @admin.display(description='',)
+    def equal_string(self, obj):
+        return format_html('<b>=</b>')
+    
+    @admin.display(description='Общая стоимось',)
+    def general_price(self, obj):
+        return format_html(f'<b>{obj.general_price} $</b>')
     
     @admin.display(description='Поставщик',)
     def device_supplier(self, obj):
@@ -83,8 +96,7 @@ class OrderAdmin(admin.ModelAdmin):
         for item in obj.items.select_related('device'):
             short_info += (
                 f'{item.device.name} '
-                f'<em>{item.quantity} шт × {item.price_for_one}'
-                f' = <b>{item.general_price} $</b></em><br>'
+                f'{item.price_for_one}×{item.quantity}<br>'
             )
             
         short_info += '<br>'
@@ -94,6 +106,6 @@ class OrderAdmin(admin.ModelAdmin):
                 f'@{obj.buyer.username}</a>'
             )
         else:
-            short_info += f'<b>{obj.buyer}</b>'
+            short_info += f'{obj.buyer}</b>'
         
         return format_html(short_info)

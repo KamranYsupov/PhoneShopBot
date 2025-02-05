@@ -57,7 +57,7 @@ def create_order_from_cart(
             return
         
         for item in order_items:
-            item.general_price = item.get_general_price() # Вручную вычисляем price для каждого обьекта
+            item.price_for_one = item.get_price_for_one() # Вручную вычисляем price_for_one для каждого обьекта
         
         Device.objects.bulk_update(updated_devices, ['quantity'])
         OrderItem.objects.bulk_create(order_items)

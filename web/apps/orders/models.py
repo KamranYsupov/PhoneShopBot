@@ -109,8 +109,8 @@ class Order(AsyncBaseModel):
     
 class OrderItem(AsyncBaseModel, QuantityMixin):
     """Модель элемента заказа"""
-    general_price = models.PositiveBigIntegerField(
-        _('Цена'),
+    price_for_one = models.PositiveBigIntegerField(
+        _('Цена за 1 шт'),
         default=0 
     )
 
@@ -140,8 +140,8 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
 
     def save(self, *args, **kwargs):
         if self._state.adding:  # Если создаем объект
-            self.general_price = self.get_general_price() if not self.general_price \
-                else self.general_price
+            self.price_for_one = self.get_price_for_one() if not self.price_for_one \
+                else self.price_for_one
             return super().save(*args, **kwargs)
 
         if self.quantity > (self.__quantity + self.device.quantity):
@@ -160,12 +160,12 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
                   'превышает количесто товара на складе')
             )
 
-    def get_general_price(self) -> int:
+    @property
+    def general_price(self) -> int:
         general_price = self.price_for_one * self.quantity
         return general_price
 
-    @property
-    def price_for_one(self) -> int:
+    def get_price_for_one(self) -> int:
         price_for_one = self.device.price_from_1 \
             if self.quantity < 20 else self.device.price_from_20
 
