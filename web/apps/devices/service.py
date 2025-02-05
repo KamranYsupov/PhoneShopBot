@@ -58,6 +58,11 @@ def import_devices_from_excel(excel_file):
         model, _ = DeviceModel.objects.get_or_create(name=row['model'], company=company)
         series, _ = DeviceSeries.objects.get_or_create(name=row['series'], model=model)
         supplier, _ = Supplier.objects.get_or_create(name=row['supplier'])
+        
+        try:
+            quantity = int(row.get('quantity'))
+        except ValueError:
+            quantity = 100
 
         Device.objects.update_or_create(
             name=row['device'],
@@ -66,6 +71,6 @@ def import_devices_from_excel(excel_file):
                 'series': series,
                 'price_from_1': row['price_from_1'],
                 'price_from_20': row['price_from_20'],
-                'quantity': row.get('quantity', 100)
+                'quantity': quantity
             }
         )
