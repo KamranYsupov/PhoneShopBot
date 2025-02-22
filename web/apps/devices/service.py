@@ -27,13 +27,8 @@ def export_devices_to_excel(file_name=None):
     
     for device in devices:
         data.append({
-            'company': device.series.model.company.name,
-            'model': device.series.model.name,
-            'series': device.series.name,
-            'device': device.name,
-            'price_from_1': device.price_from_1,
-            'price_from_20': device.price_from_20,
-            'quantity': device.quantity
+            'Устройство': device.name,
+            'Цена за 1 шт': device.price_from_1,
         })
 
     df = pd.DataFrame(data)
