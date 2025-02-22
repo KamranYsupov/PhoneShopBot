@@ -20,6 +20,15 @@ x-function: &base_python
   networks:
     - internal
 
+x-celery: &base_celery
+  <<: *base_python
+  build:
+    context: .
+    dockerfile: web.dockerfile
+  entrypoint: celery
+  links:
+    - redis
+  restart: always
 
 services:
   db:
@@ -85,18 +94,16 @@ services:
       - .env
     restart: always
 
+  beat:
+    <<: *base_celery
+    hostname: beat
+    container_name: ${PROJECT_NAME}_beat
+    command: -A web.core.celery beat -l debug
+
   worker:
+    <<: *base_celery
     hostname: worker
     container_name: ${PROJECT_NAME}_worker
-    build:
-      context: .
-      dockerfile: web.dockerfile
-    entrypoint: celery
-    networks:
-      - internal
-    links:
-      - redis
-    restart: always
     command: >
       -A web.core.celery worker -l info -P gevent
 
