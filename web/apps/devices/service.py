@@ -1,6 +1,8 @@
-﻿import pandas as pd
+import pandas as pd
 from io import BytesIO
 from django.db import transaction
+from openpyxl.utils import get_column_letter
+import loguru
 
 from .models import (
     Device,
@@ -11,12 +13,9 @@ from .models import (
 )
 
 
-def export_devices_to_excel(file_name=None):
+def export_devices_to_excel(file_name: str):
     """
     Экспортирует данные устройств в Excel.
-    
-    :param file_name: Если указан, сохраняет файл на сервере. Если None, возвращает бинарные данные.
-    :return: Если file_name=None, возвращает бинарные данные (BytesIO). Иначе возвращает None.
     """
     # Список для хранения данных
     data = []
@@ -32,17 +31,21 @@ def export_devices_to_excel(file_name=None):
         })
 
     df = pd.DataFrame(data)
-
-    if file_name:
-        df.to_excel(file_name, index=False)
-        return None
-
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False)
 
-    excel_data = output.getvalue()
-    return excel_data
+        # Получаем активный лист
+        worksheet = writer.sheets['Sheet1']
+
+        # Устанавливаем ширину столбцов
+        for idx, col in enumerate(df.columns):
+            max_length = max(df[col].astype(str).map(len).max(), len(col))  # Максимальная длина
+            adjusted_width = (max_length + 2)  # Добавляем немного пространства
+            worksheet.column_dimensions[get_column_letter(idx + 1)].width = adjusted_width
+            loguru.logger.info(str(worksheet.column_dimensions[get_column_letter(idx + 1)]))
+    with open(file_name, 'wb') as f:
+        f.write(output.getvalue())
 
 
 def import_devices_from_excel(excel_file):

@@ -333,4 +333,4 @@ async def export_devices_to_excel_callback_handler(
         callback.message.chat.id, file_input
     )
     
-    os.remove(file_name)
+    #os.remove(file_name)
