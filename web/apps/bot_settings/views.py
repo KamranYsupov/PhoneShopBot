@@ -10,7 +10,7 @@ from web.apps.bot_settings.models import BotSettings
 def change_bot_status_view(request):
 
     if request.method != 'GET':
-        return HttpResponse("Метод не поддерживается.", status=405)
+        return HttpResponse('Метод не поддерживается.', status=405)
     
     bot_settings = BotSettings.get_instance()
     

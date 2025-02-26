@@ -14,14 +14,6 @@ app.autodiscover_tasks()
 
 app.conf.timezone = 'Europe/Moscow'
 
-app.conf.beat_schedule = {
-    'schedule-notifications': {
-        'task': 'web.apps.orders.tasks.send_orders_info',
-        'schedule': crontab(hour='9', minute='0'), # Каждый день в 9:00
-    },
-
-}
-
 def is_task_with_params_running(args):
     inspector = app.control.inspect()
 
