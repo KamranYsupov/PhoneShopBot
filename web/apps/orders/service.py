@@ -77,9 +77,11 @@ def create_order_from_cart(
 
 def send_orders_info(
     telegram_id: int = settings.ANALYTIC_RECEIVER_TELEGRAM_ID,
-    day: date | None = timezone.now().date()
+    day: date | None = None
 ):
     """Функция для отправки информации о заказах за день"""
+    if day is not None:
+        day =  timezone.now().date()
 
     orders = (
         Order.objects
@@ -94,12 +96,15 @@ def send_orders_info(
         order_items.extend(list(order.items.all()))
 
     total_price = sum([item.general_price for item in order_items])
-    orders_count = len(orders)
+
+    sold_devices_count = 0
+    for item in order_items:
+        sold_devices_count += item.quantity
 
     formated_date = day.strftime('%d.%m.%Y')
     message_text = (
         f'<b><em>Аналитика на {day.strftime(formated_date)}</em></b>:\n\n'
-        f'<em>Общее количество заказов</em>: <b>{orders_count}</b>\n'
+        f'<em>Общее количество проданных устройств</em>: <b>{sold_devices_count}</b>\n'
         f'<em>Выручка</em>: <b>{total_price} $</b>'
     )
     response = telegram_service.send_message(
