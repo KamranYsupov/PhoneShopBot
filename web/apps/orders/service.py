@@ -80,8 +80,8 @@ def send_orders_info(
     day: date | None = None
 ):
     """Функция для отправки информации о заказах за день"""
-    if day is not None:
-        day =  timezone.now().date()
+    if not day:
+        day = timezone.now().date()
 
     orders = (
         Order.objects
