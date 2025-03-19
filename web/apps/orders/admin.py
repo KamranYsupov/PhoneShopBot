@@ -46,6 +46,13 @@ class OrderItemInline(admin.TabularInline):
             return obj.supplier
 
         return obj.device.supplier.name
+
+    @admin.display(description='Устройство', )
+    def device_name(self, obj):
+        if obj.device_name:
+            return obj.device_name
+
+        return obj.device.name
     
     
 @admin.register(Order)
