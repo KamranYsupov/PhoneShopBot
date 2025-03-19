@@ -7,27 +7,27 @@ from bot.utils.message import get_item_info_message
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    fields = (
+    fields = [
         'device_supplier',
-        'device',
+        'device_name',
         'price_for_one', 
         'x_string',
         'quantity',
         'equal_string',
         'general_price', 
-    )
-    readonly_fields = (
-        'device_supplier', 
-        'device',
+    ]
+    readonly_fields = [
+        'device_supplier',
+        'device_name',
         'x_string',
         'equal_string',
         'general_price',
-    )
+    ]
     extra = 1
     
     def has_add_permission(self, request, obj=None):
         return False
-    
+
     @admin.display(description='',)
     def x_string(self, obj):
         return format_html('<b>×</b>')
@@ -39,9 +39,12 @@ class OrderItemInline(admin.TabularInline):
     @admin.display(description='Общая стоимось',)
     def general_price(self, obj):
         return format_html(f'<b>{obj.general_price} $</b>')
-    
+
     @admin.display(description='Поставщик',)
     def device_supplier(self, obj):
+        if obj.supplier:
+            return obj.supplier
+
         return obj.device.supplier.name
     
     

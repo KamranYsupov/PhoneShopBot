@@ -53,6 +53,9 @@ def import_devices_from_excel(excel_file):
     df = pd.read_excel(excel_file)
 
     with transaction.atomic():
+        for model in (DeviceCompany, Supplier):
+            model.objects.all().delete()
+
         for index, row in df.iterrows():
             company, _ = DeviceCompany.objects.get_or_create(name=row['company'])
             model, _ = DeviceModel.objects.get_or_create(name=row['model'], company=company)

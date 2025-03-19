@@ -121,8 +121,21 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
     )
     device = models.ForeignKey(
         'devices.Device',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_('Устройство'),
+        null=True,
+    )
+    device_name = models.CharField(
+        _('Название устройства'),
+        max_length=100,
+        null=True,
+        default=None,
+    )
+    supplier = models.CharField(
+        _('Поставщик'),
+        max_length=200,
+        null=True,
+        default=None,
     )
 
     class Meta:
@@ -135,7 +148,7 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
 
     def __str__(self):
         return (
-            f'{self.device.name} × {self.quantity}'
+            f'{self.device_name} × {self.quantity}'
         )
 
     def save(self, *args, **kwargs):
@@ -147,18 +160,24 @@ class OrderItem(AsyncBaseModel, QuantityMixin):
         if self.quantity > (self.__quantity + self.device.quantity):
             return
 
-        self.device.quantity += self.__quantity
-        self.device.quantity -= self.quantity
-        self.device.save()
+        try:
+            self.device.quantity += self.__quantity
+            self.device.quantity -= self.quantity
+            self.device.save()
+        except AttributeError:
+            return
 
         super().save(*args, **kwargs)
 
     def clean(self):
-        if self.quantity > (self.__quantity + self.device.quantity):
-            raise ValidationError(
-                _(f'Количество {self.device.name} '
-                  'превышает количесто товара на складе')
-            )
+        try:
+            if self.quantity > (self.__quantity + self.device.quantity):
+                raise ValidationError(
+                    _(f'Количество {self.device.name} '
+                    'превышает количесто товара на складе')
+                )
+        except AttributeError:
+            raise ValidationError(f'Утройство {self.device_name} было удалено')
 
     @property
     def general_price(self) -> int:

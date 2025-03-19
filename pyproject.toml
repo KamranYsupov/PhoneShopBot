@@ -24,6 +24,7 @@ celery = {extras = ["async"], version = "^5.4.0"}
 redis = "^5.2.1"
 gevent = "^24.11.1"
 flower = "^2.0.1"
+watchdog = "^6.0.0"
 
 
 [build-system]

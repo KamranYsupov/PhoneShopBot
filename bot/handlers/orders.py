@@ -123,7 +123,7 @@ async def complete_create_order_handler(
             'превышает количество на складе'
         )
     else:
-        await callback.message.delete()
+        await message.delete()
         return 
     
     await edit_text_or_answer(

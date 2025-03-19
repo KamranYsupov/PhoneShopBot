@@ -28,7 +28,7 @@ def create_order_from_cart(
     invalid_cart_items = []
     order_items = []
     updated_devices = []
-    cart_items = telegram_user.cart.all()
+    cart_items = telegram_user.cart.select_related('device')
     
     if not cart_items:
         return 
@@ -48,7 +48,9 @@ def create_order_from_cart(
 
             order_items.append(OrderItem(
                 order_id=order.id,
-                device_id=cart_item.device_id,
+                device_id=cart_item.device.id,
+                device_name=cart_item.device.name,
+                supplier=cart_item.device.supplier.name,
                 quantity=cart_item.quantity
             ))
 
