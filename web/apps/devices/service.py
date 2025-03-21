@@ -1,6 +1,8 @@
 import pandas as pd
 from io import BytesIO
 from django.db import transaction
+from django.db.models import Case, When, Value, IntegerField
+from django.conf import settings
 from openpyxl.utils import get_column_letter
 import loguru
 
@@ -13,6 +15,23 @@ from .models import (
 )
 
 
+def get_devices_sorted_by_company():
+    whens = [
+        When(series__model__company__name=company, then=Value(idx))
+        for idx, company in enumerate(settings.DEVICE_COMPANY_ORDER)
+    ]
+
+    return Device.objects.select_related(
+        'series__model__company'
+    ).annotate(
+        sort_order=Case(
+            *whens,
+            default=Value(len(settings.DEVICE_COMPANY_ORDER)),  # Все остальные компании в конце
+            output_field=IntegerField()
+        )
+    ).order_by('sort_order')
+
+
 def export_devices_to_excel(file_name: str):
     """
     Экспортирует данные устройств в Excel.
@@ -20,9 +39,7 @@ def export_devices_to_excel(file_name: str):
     # Список для хранения данных
     data = []
 
-    devices = Device.objects.select_related(
-        'series__model__company'
-    ).all()
+    devices = get_devices_sorted_by_company()
     
     for device in devices:
         data.append({
@@ -43,7 +60,7 @@ def export_devices_to_excel(file_name: str):
             max_length = max(df[col].astype(str).map(len).max(), len(col))  # Максимальная длина
             adjusted_width = (max_length + 2)  # Добавляем немного пространства
             worksheet.column_dimensions[get_column_letter(idx + 1)].width = adjusted_width
-            loguru.logger.info(str(worksheet.column_dimensions[get_column_letter(idx + 1)]))
+
     with open(file_name, 'wb') as f:
         f.write(output.getvalue())
 
