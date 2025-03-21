@@ -132,3 +132,43 @@ ANALYTIC_RECEIVER_TELEGRAM_ID = os.getenv('ANALYTIC_RECEIVER_TELEGRAM_ID')
 
 TELEGRAM_API_URL = 'https://api.telegram.org'
 
+DEVICE_COMPANY_ORDER = [
+        'Apple',
+        'Samsung',
+        'Sony',
+        'Xiaomi',
+        'Poco',
+        'Redmi',
+        'Google',
+        'Honor',
+        'Huawei',
+        'Nothing',
+        'OnePlus',
+        'Realme',
+        'Tecno',
+        'Infinix',
+        'ZTE',
+        'Motorola',
+        'CMF',
+        'Garmin',
+        'GoPro',
+        'Valve',
+        'Lenovo',
+        'Amazfit',
+        'Nintendo',
+        'Onyx',
+        'Kindle',
+        'Meta',
+        'Blackview',
+        'Doogee',
+        'Oukitel',
+        'Asus',
+        'Beats',
+        'Marshall',
+        'DJI',
+        'Fujifilm',
+        'JBL',
+        'Ноутбук Redmi',
+        'Ноутбук Xiaomi'
+]
+
