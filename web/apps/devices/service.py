@@ -1,7 +1,6 @@
 import pandas as pd
 from io import BytesIO
 from django.db import transaction
-from django.db.models import Case, When, Value, IntegerField
 from django.conf import settings
 from openpyxl.utils import get_column_letter
 import loguru
@@ -16,20 +15,27 @@ from .models import (
 
 
 def get_devices_sorted_by_company():
-    whens = [
-        When(series__model__company__name=company, then=Value(idx))
-        for idx, company in enumerate(settings.DEVICE_COMPANY_ORDER)
-    ]
+    company_priority = {
+        company: idx for idx, company in
+        enumerate(settings.DEVICE_COMPANY_ORDER)
+    }
 
-    return Device.objects.select_related(
-        'series__model__company'
-    ).annotate(
-        sort_order=Case(
-            *whens,
-            default=Value(len(settings.DEVICE_COMPANY_ORDER)),  # Все остальные компании в конце
-            output_field=IntegerField()
+    series = sorted(
+        list(DeviceSeries.objects
+             .select_related('model__company')
+             .prefetch_related('devices')
+             ),
+        key=lambda x: company_priority.get(
+            x.model.company.name,
+            len(settings.DEVICE_COMPANY_ORDER)
         )
-    ).order_by('sort_order')
+    )
+
+    devices = []
+    for series_obj in series:
+        devices.extend(series_obj.devices.all())
+
+    return devices
 
 
 def export_devices_to_excel(file_name: str):
@@ -40,6 +46,7 @@ def export_devices_to_excel(file_name: str):
     data = []
 
     devices = get_devices_sorted_by_company()
+    print('series')
     
     for device in devices:
         data.append({
