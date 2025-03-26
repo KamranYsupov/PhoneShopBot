@@ -21,6 +21,8 @@ def order_post_delete(sender, instance, **kwargs):
         
 @receiver(post_delete, sender=OrderItem)
 def order_item_post_delete(sender, instance, **kwargs):
-    instance.device.quantity += instance.quantity
-    instance.device.save()
-    
+    try:
+        instance.device.quantity += instance.quantity
+        instance.device.save()
+    except AttributeError:
+        pass
