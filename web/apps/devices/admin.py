@@ -8,18 +8,20 @@ from .models import (
     Device,
     Supplier,
 )
-from ...admin.mixins import ArchiveModelAdminMixin
+from ...admin.mixins import (
+    ArchiveModelAdminMixin,
+    ArchivedTabularInlineAdminMixin,
+)
 
-
-class DeviceModelInline(admin.TabularInline):
+class DeviceModelInline(ArchivedTabularInlineAdminMixin):
     model = DeviceModel
     extra = 1
 
-class DeviceSeriesInline(admin.TabularInline):
+class DeviceSeriesInline(ArchivedTabularInlineAdminMixin):
     model = DeviceSeries
     extra = 1
 
-class DeviceInline(admin.TabularInline):
+class DeviceInline(ArchivedTabularInlineAdminMixin):
     model = Device
     fields = ('name', 'quantity', 'price_from_1', 'price_from_20')
     extra = 1

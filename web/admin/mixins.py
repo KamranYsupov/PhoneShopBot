@@ -13,6 +13,16 @@ class ArchiveModelAdminMixin(admin.ModelAdmin):
             return self.model.objects.all()
 
 
+class ArchivedTabularInlineAdminMixin(admin.TabularInline):
+    def get_queryset(self, request):
+        try:
+            return super().get_queryset(request).filter(
+                is_archived=False
+            )
+        except TypeError as e:
+            return super().get_queryset(request)
+
+
 class SingletonModelAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
