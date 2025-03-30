@@ -46,7 +46,6 @@ def export_devices_to_excel(file_name: str):
     data = []
 
     devices = get_devices_sorted_by_company()
-    print('series')
     
     for device in devices:
         data.append({
@@ -77,8 +76,7 @@ def import_devices_from_excel(excel_file):
     df = pd.read_excel(excel_file)
 
     with transaction.atomic():
-        for model in (DeviceCompany, Supplier):
-            model.objects.all().delete()
+        object_ids = []
 
         for index, row in df.iterrows():
             company, _ = DeviceCompany.objects.get_or_create(name=row['company'])
@@ -91,7 +89,7 @@ def import_devices_from_excel(excel_file):
             except ValueError:
                 quantity = 100
 
-            Device.objects.update_or_create(
+            device, _ = Device.objects.update_or_create(
                 name=row['device'],
                 defaults={
                     'supplier': supplier,
@@ -101,3 +99,12 @@ def import_devices_from_excel(excel_file):
                     'quantity': quantity
                 }
             )
+            object_ids.extend(
+                (company.id, model.id, series.id, device.id, supplier.id)
+            )
+
+        for model in (DeviceCompany, DeviceModel, DeviceSeries, Device, Supplier):
+            model.objects.exclude(id__in=object_ids).update(is_archived=True)
+
+
+

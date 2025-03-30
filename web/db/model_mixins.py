@@ -1,3 +1,7 @@
+from typing import Sequence, List, Dict
+
+from asgiref.sync import sync_to_async
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from ulid import ULID
@@ -68,4 +72,12 @@ class QuantityMixin(models.Model):
 
     class Meta:
         abstract = True
-        
+
+
+class ArchiveMixin(models.Model):
+    """Миксин для создания модели с возможностью архивации(скрытия) объектов"""
+
+    is_archived = models.BooleanField(default=False, db_index=False)
+
+    class Meta:
+        abstract = True

@@ -54,7 +54,7 @@ class OrderItemInline(admin.TabularInline):
 
         return obj.device.name
     
-    
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (

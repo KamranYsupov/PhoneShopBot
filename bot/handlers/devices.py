@@ -40,7 +40,7 @@ async def device_companies_callback_query(
     per_page = 10
     message_text = 'Выберите производителя устройств'
     
-    device_companies = await DeviceCompany.objects.a_all()
+    device_companies = await DeviceCompany.objects.afilter(is_archived=False)
     paginator = Paginator(
         array=device_companies,
         per_page=per_page,

@@ -32,13 +32,13 @@ async def search_devices(
         return 
     
     offset = int(inline_query.offset) if inline_query.offset else 0
-    devices = []
     if inline_query.query:
         devices = await Device.objects.afilter(
-            name__iregex=inline_query.query
+            name__iregex=inline_query.query,
+            is_archived=False
         )
     else:
-        devices = await Device.objects.a_all()
+        devices = await Device.objects.afilter(is_archived=False)
         
     results = []
     for device in devices[offset:50]:

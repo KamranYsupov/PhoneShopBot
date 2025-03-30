@@ -4,11 +4,12 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 
 from web.db.model_mixins import (
+    ArchiveMixin,
     AsyncBaseModel,
     QuantityMixin,
 )
 
-class DeviceCompany(AsyncBaseModel):
+class DeviceCompany(ArchiveMixin, AsyncBaseModel):
     """Модель компании устройства"""
     name = models.CharField(
         _('Название'),
@@ -25,7 +26,7 @@ class DeviceCompany(AsyncBaseModel):
         return self.name
     
     
-class DeviceModel(AsyncBaseModel):
+class DeviceModel(ArchiveMixin, AsyncBaseModel):
     """Модель модели устройства"""
     name = models.CharField(
         _('Название'),
@@ -54,7 +55,7 @@ class DeviceModel(AsyncBaseModel):
         return self.name
     
     
-class DeviceSeries(AsyncBaseModel):
+class DeviceSeries(ArchiveMixin, AsyncBaseModel):
     """Модель серии модели устройства"""
     name = models.CharField(
         _('Название'),
@@ -83,7 +84,7 @@ class DeviceSeries(AsyncBaseModel):
         return self.name
     
     
-class Device(AsyncBaseModel, QuantityMixin):
+class Device(ArchiveMixin, AsyncBaseModel, QuantityMixin):
     """Модель устройства"""
     name = models.CharField(
         _('Название'),
@@ -121,7 +122,7 @@ class Device(AsyncBaseModel, QuantityMixin):
         return self.name
 
 
-class Supplier(AsyncBaseModel):
+class Supplier(ArchiveMixin, AsyncBaseModel):
     """Модель поставщика"""
     name = models.CharField(
         _('Имя'),

@@ -20,12 +20,9 @@ def change_bot_status() -> None:
     if bot_settings.is_active:
         bot_settings.is_active = False
         target_func = sync_start_bot
-        print('start')
     else:
         bot_settings.is_active = True
         target_func = sync_stop_bot
-        print('stop')
-    
     
     bot_settings.save()    
     thread = threading.Thread(target=target_func)
