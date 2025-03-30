@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Settings
+from ...admin.mixins import SingletonModelAdmin
+
+
+@admin.register(Settings)
+class SettingsAdmin(SingletonModelAdmin):
+    pass

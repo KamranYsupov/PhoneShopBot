@@ -81,3 +81,28 @@ class ArchiveMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+class SingletonModel(models.Model):
+    """Singelton модель"""
+
+    def save(self, *args, **kwargs):
+        if self.__class__.objects.count() == 0:
+            super().save(*args, **kwargs)
+        else:
+            existing = self.__class__.objects.get()
+            self.id = existing.id
+            super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    @classmethod
+    @sync_to_async
+    def aload(cls):
+        return cls.load()
+
+    class Meta:
+        abstract = True
