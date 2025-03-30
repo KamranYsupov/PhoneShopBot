@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
@@ -39,9 +40,32 @@ class TelegramMessageModelMixin(models.Model):
         
         return self.text
     
-    
+
+class NotificationTemplate(AsyncBaseModel, TelegramMessageModelMixin):
+    """Модель шаблона рассылки"""
+
+    class Meta:
+        verbose_name = _('Шаблон рассылки')
+        verbose_name_plural = _('Шаблоны рассылки')
+
+
 class Notification(AsyncBaseModel, TelegramMessageModelMixin):
     """Модель telegram уведомления"""
+    text = models.TextField(
+        _('Текст'),
+        max_length=4000,
+        null=True,
+        blank=True,
+        default=None,
+    )
+    template = models.ForeignKey(
+        'notifications.NotificationTemplate',
+        verbose_name=_('Шаблон'),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+    )
 
     receivers = models.ManyToManyField(
         'telegram_users.TelegramUser', 
@@ -51,3 +75,9 @@ class Notification(AsyncBaseModel, TelegramMessageModelMixin):
     class Meta:
         verbose_name = _('Уведомление')
         verbose_name_plural = _('Уведомления')
+
+    def clean(self):
+        if not self.text and not self.template:
+            raise ValidationError(
+                'Одно из полей "Текст", или "Шаблон" должно быть заполнено'
+            )

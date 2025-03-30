@@ -8,15 +8,16 @@ from web.services.telegram_service import telegram_service
     
     
 @receiver(post_save, sender=Notification)
-def send_notification_after_creation(sender, instance, created, **kwargs):
+def send_notification_after_creation(sender, instance: Notification, created, **kwargs):
     if not created:
         return
 
     def send_notification():
         for receiver in instance.receivers.all():
+            text = instance.text if instance.text else instance.template.text
             telegram_service.send_message(
                 chat_id=receiver.telegram_id,
-                text=instance.text
+                text=text
             )
-            
-    transaction.on_commit(send_notification)               
+
+    transaction.on_commit(send_notification)
