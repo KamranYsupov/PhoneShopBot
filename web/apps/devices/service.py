@@ -33,7 +33,7 @@ def get_devices_sorted_by_company():
 
     devices = []
     for series_obj in series:
-        devices.extend(series_obj.devices.all())
+        devices.extend(series_obj.devices.filter(is_archived=False))
 
     return devices
 

@@ -85,7 +85,7 @@ async def device_company_callback_query(
 
     company = await DeviceCompany.objects.aget(id=company_id)
     message_text = f'Список моделей <b>{company.name}</b>:'
-    device_models = await sync_to_async(list)(company.models.all())
+    device_models = await sync_to_async(list)(company.models.filter(is_archived=False))
 
     paginator = Paginator(
         array=device_models,
@@ -127,7 +127,7 @@ async def device_model_callback_query(
 
     model = await DeviceModel.objects.aget(id=model_id)
     message_text = f'Выберите серию <b>{model.name}</b>'
-    device_series = await sync_to_async(list)(model.series.all()) 
+    device_series = await sync_to_async(list)(model.series.filter(is_archived=False))
     paginator = Paginator(
         array=device_series,
         per_page=per_page,
@@ -173,7 +173,7 @@ async def device_series_callback_query(
 
     series = await DeviceSeries.objects.aget(id=series_id)
     message_text = f'Список устройств <b>{series.name}</b>:'
-    devices = await sync_to_async(list)(series.devices.all()) 
+    devices = await sync_to_async(list)(series.devices.filter(is_archived=False))
     paginator = Paginator(
         array=devices,
         per_page=per_page,
