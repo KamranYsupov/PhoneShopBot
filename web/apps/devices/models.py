@@ -14,7 +14,6 @@ class DeviceCompany(ArchiveMixin, AsyncBaseModel):
     name = models.CharField(
         _('Название'),
         max_length=100,
-        unique=True,
         db_index=True,
     )
     
@@ -44,12 +43,6 @@ class DeviceModel(ArchiveMixin, AsyncBaseModel):
     class Meta:
         verbose_name = _('модель')
         verbose_name_plural = _('модели')
-        constraints = [
-            models.UniqueConstraint(
-                fields=['name', 'company'],
-                name='unique_model_name_per_company'
-            )
-        ]
 
     def __str__(self):
         return self.name
@@ -73,12 +66,6 @@ class DeviceSeries(ArchiveMixin, AsyncBaseModel):
     class Meta:
         verbose_name = _('серия')
         verbose_name_plural = _('серии')
-        constraints = [
-            models.UniqueConstraint(
-                fields=['name', 'model'],
-                name='unique_series_name_per_model'
-            )
-        ]
 
     def __str__(self):
         return self.name
@@ -111,12 +98,6 @@ class Device(ArchiveMixin, AsyncBaseModel, QuantityMixin):
     class Meta:
         verbose_name = _('устройство')
         verbose_name_plural = _('устройства')
-        constraints = [
-            models.UniqueConstraint(
-                fields=['name', 'series'],
-                name='unique_device_name_per_series'
-            )
-        ]
 
     def __str__(self):
         return self.name

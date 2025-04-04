@@ -79,11 +79,25 @@ def import_devices_from_excel(excel_file):
         object_ids = []
 
         for index, row in df.iterrows():
-            company, _ = DeviceCompany.objects.get_or_create(name=row['company'])
-            model, _ = DeviceModel.objects.get_or_create(name=row['model'], company=company)
-            series, _ = DeviceSeries.objects.get_or_create(name=row['series'], model=model)
-            supplier, _ = Supplier.objects.get_or_create(name=row['supplier'])
-        
+            company, _ = DeviceCompany.objects.get_or_create(
+                name=row['company'],
+                is_archived=False,
+            )
+            model, _ = DeviceModel.objects.get_or_create(
+                name=row['model'],
+                company=company,
+                is_archived=False,
+            )
+            series, _ = DeviceSeries.objects.get_or_create(
+                name=row['series'],
+                model=model,
+                is_archived=False,
+            )
+            supplier, _ = Supplier.objects.get_or_create(
+                name=row['supplier'],
+                is_archived=False,
+            )
+
             try:
                 quantity = int(row.get('quantity'))
             except ValueError:
@@ -91,6 +105,7 @@ def import_devices_from_excel(excel_file):
 
             device, _ = Device.objects.update_or_create(
                 name=row['device'],
+                is_archived=False,
                 defaults={
                     'supplier': supplier,
                     'series': series,
@@ -103,8 +118,8 @@ def import_devices_from_excel(excel_file):
                 (company.id, model.id, series.id, device.id, supplier.id)
             )
 
-        for model in (DeviceCompany, DeviceModel, DeviceSeries, Device, Supplier):
-            model.objects.exclude(id__in=object_ids).update(is_archived=True)
+        for db_model in (DeviceCompany, DeviceModel, DeviceSeries, Device, Supplier):
+            db_model.objects.exclude(id__in=object_ids).update(is_archived=True)
 
 
 
