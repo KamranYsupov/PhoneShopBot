@@ -5,6 +5,7 @@ from aiogram import Router, types, F, Bot
 from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 from asgiref.sync import sync_to_async
+from django.conf import settings
 
 from bot.keyboards.inline import (
     get_inline_keyboard,
@@ -41,8 +42,17 @@ async def device_companies_callback_query(
     message_text = 'Выберите производителя устройств'
     
     device_companies = await DeviceCompany.objects.afilter(is_archived=False)
+    company_order = {
+        company_name: indx for indx, company_name
+        in enumerate(settings.DEVICE_COMPANY_ORDER)
+    }
+
+    ordered_companies = sorted(
+        device_companies,
+        key=lambda x: company_order.get(x.name, len(company_order))
+    )
     paginator = Paginator(
-        array=device_companies,
+        array=ordered_companies,
         per_page=per_page,
         page_number=page_number
     )
