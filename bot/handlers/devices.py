@@ -183,7 +183,12 @@ async def device_series_callback_query(
 
     series = await DeviceSeries.objects.aget(id=series_id)
     message_text = f'Список устройств <b>{series.name}</b>:'
-    devices = await sync_to_async(list)(series.devices.filter(is_archived=False))
+    devices = await sync_to_async(list)(
+        series.devices.filter(
+            quantity__gt=0,
+            is_archived=False,
+        )
+    )
     paginator = Paginator(
         array=devices,
         per_page=per_page,
