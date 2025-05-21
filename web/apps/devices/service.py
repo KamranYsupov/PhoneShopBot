@@ -2,6 +2,7 @@ import pandas as pd
 from io import BytesIO
 from django.db import transaction
 from django.conf import settings
+from django.utils import timezone
 from openpyxl.utils import get_column_letter
 import loguru
 
@@ -88,15 +89,17 @@ def import_devices_from_excel(excel_file):
                 name=row['company'],
                 is_archived=False,
             )
-            model, _ = DeviceModel.objects.get_or_create(
+            model, _ = DeviceModel.objects.update_or_create(
                 name=row['model'],
                 company=company,
                 is_archived=False,
+                defaults={'last_import_time': timezone.now()}
             )
-            series, _ = DeviceSeries.objects.get_or_create(
+            series, _ = DeviceSeries.objects.update_or_create(
                 name=row['series'],
                 model=model,
                 is_archived=False,
+                defaults={'last_import_time': timezone.now()}
             )
             supplier, _ = Supplier.objects.get_or_create(
                 name=row['supplier'],
@@ -116,7 +119,8 @@ def import_devices_from_excel(excel_file):
                     'series': series,
                     'price_from_1': row['price_from_1'],
                     'price_from_20': row['price_from_20'],
-                    'quantity': quantity
+                    'quantity': quantity,
+                    'last_import_time': timezone.now()
                 }
             )
             object_ids.extend(

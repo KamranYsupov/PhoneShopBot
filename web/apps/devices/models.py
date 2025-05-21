@@ -1,4 +1,5 @@
 ﻿from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -32,6 +33,10 @@ class DeviceModel(ArchiveMixin, AsyncBaseModel):
         max_length=100,
         db_index=True,
     )
+    last_import_time = models.DateTimeField(
+        _('Дата последнего импорта'),
+        default=timezone.now
+    )
     
     company = models.ForeignKey(
         'devices.DeviceCompany',
@@ -43,6 +48,7 @@ class DeviceModel(ArchiveMixin, AsyncBaseModel):
     class Meta:
         verbose_name = _('модель')
         verbose_name_plural = _('модели')
+        ordering = ['last_import_time']
 
     def __str__(self):
         return self.name
@@ -55,6 +61,10 @@ class DeviceSeries(ArchiveMixin, AsyncBaseModel):
         max_length=100,
         db_index=True,
     )
+    last_import_time = models.DateTimeField(
+        _('Дата последнего импорта'),
+        default=timezone.now
+    )
     
     model = models.ForeignKey(
         'devices.DeviceModel',
@@ -66,6 +76,7 @@ class DeviceSeries(ArchiveMixin, AsyncBaseModel):
     class Meta:
         verbose_name = _('серия')
         verbose_name_plural = _('серии')
+        ordering = ['last_import_time']
 
     def __str__(self):
         return self.name
@@ -80,6 +91,10 @@ class Device(ArchiveMixin, AsyncBaseModel, QuantityMixin):
     )
     price_from_1 = models.PositiveBigIntegerField(_('Цена от 1 шт'))
     price_from_20 = models.PositiveBigIntegerField(_('Цена от 20 шт'))
+    last_import_time = models.DateTimeField(
+        _('Дата последнего импорта'),
+        default=timezone.now
+    )
     
     series = models.ForeignKey(
         'devices.DeviceSeries',
@@ -98,6 +113,7 @@ class Device(ArchiveMixin, AsyncBaseModel, QuantityMixin):
     class Meta:
         verbose_name = _('устройство')
         verbose_name_plural = _('устройства')
+        ordering = ['last_import_time']
 
     def __str__(self):
         return self.name
